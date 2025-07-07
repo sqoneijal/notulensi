@@ -1,0 +1,24 @@
+services:
+   notulensi-api:
+      container_name: notulensi-api
+      image: notulensi-api
+      build:
+         context: ./api
+         dockerfile: ./Dockerfile
+      ports:
+         - 1013:80
+      volumes:
+         - ./api:/var/www/html
+      restart: always
+
+   notulensi-frontend:
+      container_name: notulensi-frontend
+      image: notulensi-frontend
+      build:
+         context: ./frontend
+         dockerfile: ./Dockerfile
+      ports:
+         - "1014:80"
+      environment:
+         - NODE_ENV=production
+      restart: always
