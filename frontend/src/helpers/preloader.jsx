@@ -24,5 +24,4 @@ const PreLoader = () => {
       </div>
    );
 };
-
-export { PreLoader };
+export default PreLoader;

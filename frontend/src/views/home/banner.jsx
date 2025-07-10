@@ -1,18 +1,29 @@
 import AOS from "aos";
 import "aos/dist/aos.css";
+import DOMPurify from "dompurify";
 import { useEffect } from "react";
+import { Link } from "react-router";
 
-const Banner = () => {
+const Banner = ({ ...state }) => {
+   const { banner } = state;
+   console.log(banner);
+
    useEffect(() => {
       AOS.init({
-         duration: 1000, // durasi default animasi
-         once: true, // animasi hanya 1x scroll
+         duration: 1000,
+         once: true,
       });
    }, []);
 
+   const insertBreakAfterFirstWord = (text) => {
+      const words = text.split(" ");
+      if (words.length <= 1) return text;
+      return `${words[0]}<br/><span>${words.slice(1).join(" ")}</span>`;
+   };
+
    return (
       <section className="banner-section">
-         <div className="bg bg-image" style={{ backgroundImage: `url('https://expert-themes.com/html/konfer/images/banner/1.png')` }} />
+         <div className="bg bg-image" style={{ backgroundImage: `url('${banner.banner_image}')` }} />
          <div className="auto-container">
             <div className="banner-layer" />
             <div className="content-box">
@@ -29,44 +40,23 @@ const Banner = () => {
                      </div>
                   </div>
                </div>
-               <h1 className="title title-anim">
-                  Conference <br />
-                  <span className="banner-small-images">
-                     <img
-                        src="https://expert-themes.com/html/konfer/images/banner/user-1.png"
-                        alt="Image"
-                        data-aos="fade-right"
-                        data-aos-delay="2300"
-                     />
-                     <img
-                        src="https://expert-themes.com/html/konfer/images/banner/user-2.png"
-                        alt="Image"
-                        data-aos="fade-right"
-                        data-aos-delay="2500"
-                     />
-                     <img
-                        src="https://expert-themes.com/html/konfer/images/banner/user-3.png"
-                        alt="Image"
-                        data-aos="fade-right"
-                        data-aos-delay="2800"
-                     />
-                  </span>
-                  <span>For insights</span>
-               </h1>
+               <h1
+                  className="title title-anim"
+                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(insertBreakAfterFirstWord(banner.agenda), { format: "html5" }) }}
+               />
                <div className="location-box" data-aos="fade-right" data-aos-delay="3100">
                   <div className="text">
                      Germany <i className="icon fa fa-long-arrow-right" /> <br /> 1047 Brea Mall #1047 Brea, CA 92821
                   </div>
                   <div className="btn-box">
-                     <a href="contact.html" className="theme-btn btn-style-one bg-yellow">
-                        <span className="btn-title">Registration Now</span>
-                     </a>
+                     <Link to={`/detail/event/${banner.id}`} className="theme-btn btn-style-one bg-yellow">
+                        <span className="btn-title">Detail</span>
+                     </Link>
                   </div>
                </div>
             </div>
-
             <div className="time-counter" data-aos="fade" data-aos-delay="3500">
-               <div className="time-countdown" data-countdown="10/14/2025"></div>
+               <div className="time-countdown" data-countdown="10/14/2025" />
             </div>
          </div>
       </section>

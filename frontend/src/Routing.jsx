@@ -1,4 +1,4 @@
-import { PreLoader } from "@helpers";
+import PreLoader from "@helpers/preloader";
 import React from "react";
 import { Route, Routes } from "react-router";
 import routes from "./routes";

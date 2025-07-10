@@ -3,3 +3,4 @@ api/vendor
 frontend/src/assets/css/fontawesome-free-6.7.2-web/*
 api/app/Config/Database.php
 .vscode/sftp.json
+frontend/.env.development

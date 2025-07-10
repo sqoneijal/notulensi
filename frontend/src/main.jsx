@@ -1,12 +1,19 @@
 import "bootstrap/dist/css/bootstrap.css";
 import "./assets/css/master.css";
 
+import PreLoader from "@helpers/preloader";
+import React from "react";
 import { createRoot } from "react-dom/client";
+import { Toaster } from "react-hot-toast";
 import { BrowserRouter } from "react-router";
-import App from "./App.jsx";
+
+const App = React.lazy(() => import("./App"));
 
 createRoot(document.getElementById("root")).render(
    <BrowserRouter>
-      <App />
+      <React.Suspense fallback={<PreLoader />}>
+         <Toaster position="top-center" />
+         <App />
+      </React.Suspense>
    </BrowserRouter>
 );

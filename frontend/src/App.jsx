@@ -1,9 +1,9 @@
-import { Header } from "@components";
-import { PreLoader } from "@helpers";
+import PreLoader from "@helpers/preloader";
 import { gsap } from "gsap";
 import React, { useEffect, useRef } from "react";
 
 const Routing = React.lazy(() => import("./Routing"));
+const Header = React.lazy(() => import("@components/header"));
 
 function App() {
    const circle = useRef(null);

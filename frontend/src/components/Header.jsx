@@ -1,4 +1,4 @@
-import { PreLoader } from "@helpers";
+import PreLoader from "@helpers/preloader";
 import React, { useEffect, useState } from "react";
 
 const LogoBox = React.lazy(() => import("./LogoBox"));
