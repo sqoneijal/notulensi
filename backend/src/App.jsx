@@ -1,35 +1,73 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { setInit } from "@/redux";
+import { handleLogout, initKeycloak } from "@helpers/auth";
+import Pageloader from "@helpers/pageloader";
+import { cariPegawai } from "@helpers/simpeg";
+import React, { useEffect, useRef, useState } from "react";
+import { useDispatch } from "react-redux";
+import ResizeObserver from "resize-observer-polyfill";
+import SimpleBar from "simplebar";
+import Routing from "./routing";
+
+const Header = React.lazy(() => import("@components/header"));
+const Sidebar = React.lazy(() => import("@components/sidebar"));
+const Breadcrumbs = React.lazy(() => import("@components/breadcrumbs"));
+const Footer = React.lazy(() => import("@components/footer"));
 
 function App() {
-  const [count, setCount] = useState(0)
+   const simplebarRef = useRef(null);
+   const dispatch = useDispatch();
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+   const [{ isLoadingInitUser }, setState] = useState({
+      isLoadingInitUser: true,
+   });
+
+   useEffect(() => {
+      if (simplebarRef?.current) {
+         new SimpleBar(simplebarRef?.current);
+         window.ResizeObserver = ResizeObserver;
+      }
+      return () => {};
+   }, [simplebarRef]);
+
+   useEffect(() => {
+      initKeycloak().then((res) => {
+         if (!res) return;
+
+         const { keycloak, user } = res;
+         if (Object.keys(user).length > 0) {
+            cariPegawai(user.preferred_username).then((res) => {
+               if (res.length > 0) {
+                  const simpeg = res[0];
+                  dispatch(setInit({ user, simpeg, token: { Authorization: `Bearer ${keycloak.token}` } }));
+                  setState({ isLoadingInitUser: false });
+                  return;
+               }
+
+               return handleLogout();
+            });
+         } else {
+            return handleLogout();
+         }
+      });
+   }, [dispatch]);
+
+   return isLoadingInitUser ? (
+      <Pageloader />
+   ) : (
+      <React.Suspense fallback={<Pageloader />}>
+         <Header />
+         <div className="page-body-wrapper">
+            <Sidebar />
+            <div className="page-body">
+               <Breadcrumbs />
+               <div className="container-fluid">
+                  <Routing />
+               </div>
+            </div>
+            <Footer />
+         </div>
+      </React.Suspense>
+   );
 }
 
-export default App
+export default App;
