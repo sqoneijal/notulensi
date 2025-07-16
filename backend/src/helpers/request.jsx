@@ -121,3 +121,9 @@ const abortSignal = (timeoutMs) => {
    setTimeout(() => abortController.abort(), timeoutMs || 0);
    return abortController.signal;
 };
+
+export const postValue = (obj) => {
+   const formData = {};
+   Object.keys(obj).forEach((key) => (formData[key] = obj[key]));
+   return formData;
+};

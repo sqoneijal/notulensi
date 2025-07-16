@@ -2,11 +2,7 @@
 
 use CodeIgniter\Router\RouteCollection;
 
-/**
- * @var RouteCollection $routes
- */
-// $routes->get('/', 'Home::index');
-
-$routes->group('frontend', ['namespace' => 'App\Controllers\Frontend'], function ($routes) {
-   $routes->get('home', 'Home::getData');
+$routes->group('', ['filter' => 'cors:api'], static function (RouteCollection $routes): void {
+   $routes->options('backend/notulen', 'Notulen::options');
+   $routes->resource('backend/notulen');
 });

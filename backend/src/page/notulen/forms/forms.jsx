@@ -1,10 +1,10 @@
 import { Date } from "@helpers/date";
-import { AsyncFormTypeahead, FormText } from "@helpers/forms";
-import { post } from "@helpers/request";
+import { AsyncFormTypeahead, DropzoneUpload, FormText } from "@helpers/forms";
+import { post, postValue } from "@helpers/request";
 import { cariPegawai } from "@helpers/simpeg";
 import moment from "moment";
 import { useState } from "react";
-import { Button, Card, Form, Row } from "react-bootstrap";
+import { Button, Card, Col, Form, Row } from "react-bootstrap";
 import { useSelector } from "react-redux";
 
 const Forms = () => {
@@ -22,7 +22,14 @@ const Forms = () => {
    const handleSubmit = (e) => {
       e.preventDefault();
       setState((prev) => ({ ...prev, isSubmit: true }));
-      const fetch = post("/notulen/submit");
+
+      const fetch = post("/notulen", postValue(input));
+      fetch.then((res) => {
+         const { data } = res;
+         if (data.status === false) {
+            setState((prev) => ({ ...prev, errors: { ...data.errors } }));
+         }
+      });
       fetch.finally(() => setState((prev) => ({ ...prev, isSubmit: false })));
    };
 
@@ -54,7 +61,7 @@ const Forms = () => {
                      name="meeting_date"
                      errors={errors}
                      value={input?.meeting_date ? moment(input.meeting_date, "YYYY-MM-DD").toDate() : null}
-                     onChange={(date) => setInput("meeting_date", moment(date))}
+                     onChange={(date) => setInput("meeting_date", moment(date).toDate())}
                      col={{ md: 4 }}
                   />
                </Row>
@@ -94,6 +101,15 @@ const Forms = () => {
                      }
                      options={dropdown.daftarPegawai}
                   />
+               </Row>
+               <Row>
+                  <Col xs={12} className="mt-2">
+                     <DropzoneUpload
+                        accept="image/*"
+                        onFileSelect={(file) => setInput("banner_file", file)}
+                        label="Klik atau seret gambar banner ke sini"
+                     />
+                  </Col>
                </Row>
             </Form>
          </Card.Body>

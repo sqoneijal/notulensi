@@ -62,7 +62,6 @@ const cariPegawai = async (str) => {
       const { data } = res;
       if (typeof data.code !== "undefined" && data.code !== 200) {
          toast.error(data.message);
-         return;
       }
    });
    send.catch((error) => {

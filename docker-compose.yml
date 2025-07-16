@@ -10,8 +10,6 @@ services:
       volumes:
          - ./api:/var/www/html
       restart: always
-      command: sh -c "
-         chmod -R 775 /var/www/html/writable"
 
    notulensi-frontend:
       container_name: notulensi-frontend

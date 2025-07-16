@@ -13,7 +13,7 @@ export default function DatePick({ ...config }) {
          <DatePicker
             selected={value}
             onChange={onChange}
-            className="form-control"
+            className={`form-control ${errors[name] ? "is-invalid" : ""}`}
             id={normalizeText(name)}
             locale="id"
             showMonthDropdown
@@ -23,7 +23,9 @@ export default function DatePick({ ...config }) {
             dateFormat="dd-MM-yyyy hh:mm aa"
             {...config}
          />
-         <Form.Control.Feedback type="invalid">{errors[name]}</Form.Control.Feedback>
+         <Form.Control.Feedback type="invalid" style={{ display: errors[name] ? "block" : "none" }}>
+            {errors[name]}
+         </Form.Control.Feedback>
       </Col>
    );
 }

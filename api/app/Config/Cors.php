@@ -47,7 +47,7 @@ class Cors extends BaseConfig
        * E.g.:
        *   - ['https://\w+\.example\.com']
        */
-      'allowedOriginsPatterns' => ['http://localhost:5173'],
+      'allowedOriginsPatterns' => [],
 
       /**
        * Weather to send the `Access-Control-Allow-Credentials` header.
@@ -105,5 +105,15 @@ class Cors extends BaseConfig
        * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Max-Age
        */
       'maxAge' => 7200,
+   ];
+
+   public array $api = [
+      'allowedOrigins'         => ['http://localhost:5173'],
+      'allowedOriginsPatterns' => [],
+      'supportsCredentials'    => true,
+      'allowedHeaders'         => ['Authorization', 'Content-Type'],
+      'exposedHeaders'         => [],
+      'allowedMethods'         => ['GET', 'POST', 'PUT', 'DELETE'],
+      'maxAge'                 => 7200,
    ];
 }
