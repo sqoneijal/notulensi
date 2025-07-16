@@ -1,3 +1,4 @@
+import "@assets/css/custom.css";
 import "@assets/css/iconly-icon.css";
 import "@assets/css/style.css";
 import "@assets/css/themify.css";

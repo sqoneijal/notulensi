@@ -1,15 +1,18 @@
 import { Date } from "@helpers/date";
 import { AsyncFormTypeahead, DropzoneUpload, FormText } from "@helpers/forms";
+import { msgError, msgSuccess } from "@helpers/message";
 import { post, postValue } from "@helpers/request";
 import { cariPegawai } from "@helpers/simpeg";
 import moment from "moment";
 import { useState } from "react";
 import { Button, Card, Col, Form, Row } from "react-bootstrap";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router";
 
 const Forms = () => {
    const { init } = useSelector((e) => e.redux);
    const { simpeg } = init;
+   const navigate = useNavigate();
 
    const [{ errors, input, isSubmit, isLoadingSearch, dropdown }, setState] = useState({
       errors: {},
@@ -23,11 +26,19 @@ const Forms = () => {
       e.preventDefault();
       setState((prev) => ({ ...prev, isSubmit: true }));
 
-      const fetch = post("/notulen", postValue(input));
+      const nip = { pemimpin_id: simpeg.id, user_id: simpeg.id };
+      const combined = { ...input, ...nip };
+
+      const fetch = post("/notulen", postValue(combined));
       fetch.then((res) => {
          const { data } = res;
-         if (data.status === false) {
+
+         if (data.status) {
+            msgSuccess(data.message);
+            navigate("/notulen");
+         } else {
             setState((prev) => ({ ...prev, errors: { ...data.errors } }));
+            msgError(data.message);
          }
       });
       fetch.finally(() => setState((prev) => ({ ...prev, isSubmit: false })));
@@ -100,6 +111,7 @@ const Forms = () => {
                         })
                      }
                      options={dropdown.daftarPegawai}
+                     onChange={(data) => (data.length > 0 ? setInput("moderator_id", data[0].value) : "")}
                   />
                </Row>
                <Row>

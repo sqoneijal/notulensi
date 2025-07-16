@@ -1,5 +1,7 @@
 import { setActionButton } from "@/redux";
-import Lists from "@helpers/grid_table";
+import Grid from "@helpers/grid_table";
+import { h } from "gridjs";
+import moment from "moment";
 import { useEffect } from "react";
 import { Card, Col, Row } from "react-bootstrap";
 import { useDispatch } from "react-redux";
@@ -24,7 +26,38 @@ const Index = () => {
          <Col sm={12}>
             <Card>
                <Card.Body>
-                  <Lists />
+                  <Grid
+                     columns={[
+                        {
+                           name: "Judul",
+                           data: (row) => row.title,
+                        },
+                        { name: "Agenda", data: (row) => row.agenda },
+                        { name: "Waktu", data: (row) => moment(row.meeting_date).format("DD-MM-YYYY hh:mm A") },
+                        { name: "Pemimpin Rapat", data: (row) => row.pemimpin_id },
+                        {
+                           id: "aksi",
+                           sort: false,
+                           width: "6%",
+                           formatter: () =>
+                              h(
+                                 "span",
+                                 {},
+                                 h("input", {
+                                    className: "jsgrid-button jsgrid-edit-button",
+                                    type: "button",
+                                    title: "Edit",
+                                 }),
+                                 h("input", {
+                                    className: "jsgrid-button jsgrid-delete-button",
+                                    type: "button",
+                                    title: "Delete",
+                                 })
+                              ),
+                        },
+                     ]}
+                     url="/notulen"
+                  />
                </Card.Body>
             </Card>
          </Col>

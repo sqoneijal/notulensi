@@ -14,7 +14,14 @@ class Notulen extends BaseController
       return respondCors($this->response)->setStatusCode(200);
    }
 
-   public function create()
+   public function index(): object
+   {
+      $model = new Model();
+      $content = $model->getData();
+      return $this->respond($content);
+   }
+
+   public function create(): object
    {
       $response = ['status' => false, 'errors' => []];
 
@@ -23,7 +30,9 @@ class Notulen extends BaseController
          $post = $this->request->getPost();
 
          $banner_file = $this->request->getFile('banner_file');
-         $post['banner_image'] = cdn_upload($banner_file, 'banner');
+         if ($banner_file) {
+            $post['banner_image'] = cdn_upload($banner_file, 'banner');
+         }
 
          $model = new Model();
          $submit = $model->submit($post);

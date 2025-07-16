@@ -26,7 +26,7 @@ export const post = async (url, form = [], config = {}) => {
 
    // 🔁 Periksa dan perbarui token jika perlu
    if (keycloakInstance?.token && keycloakInstance.isTokenExpired()) {
-      keycloakInstance.updateToken(999_999_999_999); // perbarui token jika tinggal <30s
+      keycloakInstance.updateToken(30); // perbarui token jika tinggal <30s
       config.headers = {
          ...(config.headers || {}),
          Authorization: `Bearer ${keycloakInstance.refreshToken}`,

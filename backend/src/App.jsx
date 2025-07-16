@@ -1,9 +1,11 @@
 import { setInit } from "@/redux";
 import { handleLogout, initKeycloak } from "@helpers/auth";
+import keycloakInstance from "@helpers/keycloak";
 import Pageloader from "@helpers/pageloader";
 import { cariPegawai } from "@helpers/simpeg";
 import React, { useEffect, useRef, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { useLocation } from "react-router";
 import ResizeObserver from "resize-observer-polyfill";
 import SimpleBar from "simplebar";
 import Routing from "./routing";
@@ -14,12 +16,21 @@ const Breadcrumbs = React.lazy(() => import("@components/breadcrumbs"));
 const Footer = React.lazy(() => import("@components/footer"));
 
 function App() {
+   const { init } = useSelector((e) => e.redux);
    const simplebarRef = useRef(null);
    const dispatch = useDispatch();
+   const location = useLocation();
 
    const [{ isLoadingInitUser }, setState] = useState({
       isLoadingInitUser: true,
    });
+
+   useEffect(() => {
+      if (Object.keys(init).length > 0) {
+         keycloakInstance.updateToken(30);
+      }
+      return () => null;
+   }, [location, init]);
 
    useEffect(() => {
       if (simplebarRef?.current) {
@@ -54,19 +65,21 @@ function App() {
    return isLoadingInitUser ? (
       <Pageloader />
    ) : (
-      <React.Suspense fallback={<Pageloader />}>
-         <Header />
-         <div className="page-body-wrapper">
-            <Sidebar />
-            <div className="page-body">
-               <Breadcrumbs />
-               <div className="container-fluid">
-                  <Routing />
+      Object.keys(init).length > 0 && (
+         <React.Suspense fallback={<Pageloader />}>
+            <Header />
+            <div className="page-body-wrapper">
+               <Sidebar />
+               <div className="page-body">
+                  <Breadcrumbs />
+                  <div className="container-fluid">
+                     <Routing />
+                  </div>
                </div>
+               <Footer />
             </div>
-            <Footer />
-         </div>
-      </React.Suspense>
+         </React.Suspense>
+      )
    );
 }
 
