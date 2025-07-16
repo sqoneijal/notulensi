@@ -1,14 +1,19 @@
 import nav from "@/nav_path";
+import { setActionButton } from "@/redux";
 import iconly_sprite from "@assets/images/iconly-sprite.svg";
 import { Each } from "@helpers/each";
+import keycloakInstance from "@helpers/keycloak";
 import { useEffect, useRef } from "react";
-import { Link } from "react-router";
+import { useDispatch } from "react-redux";
+import { Link, useLocation } from "react-router";
 import ResizeObserver from "resize-observer-polyfill";
 import SimpleBar from "simplebar";
 
 const Sidebar = () => {
    const simplebarRef = useRef(null);
    const pinRefs = useRef([]);
+   const dispatch = useDispatch();
+   const location = useLocation();
 
    // Helper function to handle sidebar link click
    const handleSidebarLinkClick = (item, sidebarListItems) => {
@@ -152,6 +157,50 @@ const Sidebar = () => {
       return () => {};
    }, []);
 
+   const handleOnClickNav = (row) => {
+      keycloakInstance.updateToken(70);
+      if (row.path !== location.pathname && typeof row.child === "undefined") dispatch(setActionButton({}));
+   };
+
+   const setArrowIcon = (childElement) => {
+      if (typeof childElement !== "undefined") {
+         return <i className="iconly-Arrow-Right-2 icli" />;
+      }
+   };
+
+   const renderChild = (childElement) => {
+      if (typeof childElement !== "undefined") {
+         return (
+            <ul className="sidebar-submenu">
+               <Each
+                  of={childElement}
+                  render={(row) => (
+                     <li key={row.path}>
+                        <Link to={row.path}>{row.name}</Link>
+                     </li>
+                  )}
+               />
+            </ul>
+         );
+      }
+   };
+
+   const renderParent = (row, index) => {
+      return (
+         <li className="sidebar-list" key={row.path}>
+            <i className="fa-solid fa-thumbtack" ref={(el) => (pinRefs.current[index] = el)} />
+            <Link className="sidebar-link" to={row.path} onClick={() => handleOnClickNav(row)}>
+               <svg className="stroke-icon">
+                  <use href={`${iconly_sprite}#${row.icon}`} />
+               </svg>
+               <h6>{row.name}</h6>
+               {setArrowIcon(row.child)}
+            </Link>
+            {renderChild(row.child)}
+         </li>
+      );
+   };
+
    return (
       <aside className="page-sidebar">
          <div className="left-arrow" id="left-arrow">
@@ -169,20 +218,7 @@ const Sidebar = () => {
                      <h5 className="lan-1 f-w-700 sidebar-title">General</h5>
                   </div>
                </li>
-               <Each
-                  of={nav}
-                  render={(row, index) => (
-                     <li className="sidebar-list" key={row.path}>
-                        <i className="fa-solid fa-thumbtack" ref={(el) => (pinRefs.current[index] = el)} />
-                        <Link className="sidebar-link" to={row.path}>
-                           <svg className="stroke-icon">
-                              <use href={`${iconly_sprite}#${row.icon}`} />
-                           </svg>
-                           <h6>{row.name}</h6>
-                        </Link>
-                     </li>
-                  )}
-               />
+               <Each of={nav} render={(row, index) => renderParent(row, index)} />
                <li className="sidebar-main-title">
                   <div>
                      <h5 className="f-w-700 sidebar-title pt-3">Application</h5>

@@ -6,14 +6,12 @@ const Breadcrumbs = () => {
    const { actionButton } = useSelector((e) => e.redux);
 
    const renderActionButton = (item) => {
-      if (Object.keys(item).length > 0) {
-         if (item.type === "add" || item.type === "back") {
-            return (
-               <Link to={item.path} className={`btn ${item.className} fw-bold`}>
-                  {item.label}
-               </Link>
-            );
-         }
+      if (Object.keys(item).length > 0 && (item.type === "add" || item.type === "back")) {
+         return (
+            <Link to={item.path} className={`btn ${item.className} fw-bold`}>
+               {item.label}
+            </Link>
+         );
       }
    };
 

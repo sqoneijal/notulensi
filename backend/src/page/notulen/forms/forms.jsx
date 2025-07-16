@@ -53,9 +53,9 @@ const Forms = () => {
    };
 
    return (
-      <Card>
-         <Card.Body>
-            <Form className="row">
+      <Form className="row">
+         <Card>
+            <Card.Body>
                <Row>
                   <FormText
                      label="Judul Rapat"
@@ -123,14 +123,14 @@ const Forms = () => {
                      />
                   </Col>
                </Row>
-            </Form>
-         </Card.Body>
-         <Card.Footer>
-            <Button type="submit" disabled={isSubmit} onClick={isSubmit ? null : handleSubmit}>
-               {isSubmit ? "Loading..." : "Simpan"}
-            </Button>
-         </Card.Footer>
-      </Card>
+            </Card.Body>
+            <Card.Footer>
+               <Button type="submit" disabled={isSubmit} onClick={isSubmit ? null : handleSubmit}>
+                  {isSubmit ? "Loading..." : "Simpan"}
+               </Button>
+            </Card.Footer>
+         </Card>
+      </Form>
    );
 };
 export default Forms;
