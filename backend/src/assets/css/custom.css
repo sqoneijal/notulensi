@@ -3,12 +3,14 @@
    text-align: center;
    width: 6%;
 }
-.gridjs-table > .gridjs-tbody > tr > td:last-child > span > input.jsgrid-edit-button {
+.gridjs-table > .gridjs-tbody > tr > td:last-child > span > input.jsgrid-edit-button,
+.lampiran-tbody > tr > td:last-child > span > input.jsgrid-edit-button {
    background-position: -2px -122px;
    width: 22px;
    height: 22px;
 }
-.gridjs-table > .gridjs-tbody > tr > td:last-child > span > input.jsgrid-delete-button {
+.gridjs-table > .gridjs-tbody > tr > td:last-child > span > input.jsgrid-delete-button,
+.lampiran-tbody > tr > td:last-child > span > input.jsgrid-delete-button {
    background-position: 0 -78px;
    width: 22px;
    height: 22px;

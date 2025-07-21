@@ -14,6 +14,74 @@ class Notulen extends BaseController
       return respondCors($this->response)->setStatusCode(200);
    }
 
+   public function updateLampiran(int $id): object
+   {
+      $submit = [];
+      $validation = $this->validationLampiran();
+      if ($validation['status']) {
+         $post = $this->request->getJSON(true);
+         $model = new Model();
+         $submit = $model->updateDataLampiran($id, $post);
+      }
+
+      return $this->respond(array_merge($validation, $submit));
+   }
+
+   public function createLampiran(): object
+   {
+      $submit = [];
+      $validation = $this->validationLampiran();
+      if ($validation['status']) {
+         $post = $this->request->getPost();
+
+         $file_lampiran = $this->request->getFile('file_lampiran');
+         if ($file_lampiran) {
+            $post['file_path'] = cdn_upload($file_lampiran, 'banner');
+         }
+
+         $model = new Model();
+         $submit = $model->createDataLampiran($post);
+      }
+
+      return $this->respond(array_merge($validation, $submit));
+   }
+
+   private function validationLampiran()
+   {
+      $response = ['status' => false, 'errors' => []];
+
+      $validation = new Validate();
+
+      $input = $this->request->getMethod() === 'POST'
+         ? $this->request->getPost()
+         : $this->request->getJSON(true);
+
+      if ($this->validateData($input, $validation->submitLampiran())) {
+         $response = ['errors' => [], 'status' => true];
+      } else {
+         $response['message'] = 'Tolong periksa kembali inputan anda!';
+         $response['errors'] = \Config\Services::validation()->getErrors();
+      }
+      return $response;
+   }
+
+   public function submitButirTugas(): object
+   {
+      $response = ['status' => false, 'errors' => []];
+
+      $validation = new Validate();
+      if ($this->validate($validation->submitButirTugas())) {
+         $model = new Model();
+         $submit = $model->submitButirTugas($this->request->getPost());
+
+         $response = array_merge($submit, ['errors' => []]);
+      } else {
+         $response['message'] = 'Tolong periksa kembali inputan anda!';
+         $response['errors'] = \Config\Services::validation()->getErrors();
+      }
+      return $this->respond($response);
+   }
+
    public function updateHasilKeputusan(): object
    {
       $model = new Model();
@@ -51,6 +119,13 @@ class Notulen extends BaseController
    {
       $model = new Model();
       $content = $model->getDetail($id);
+      return $this->respond($content);
+   }
+
+   public function deleteLampiran(int $id): object
+   {
+      $model = new Model();
+      $content = $model->deleteLampiran($id);
       return $this->respond($content);
    }
 

@@ -8,6 +8,111 @@ use CodeIgniter\Database\RawSql;
 class Notulen extends Common
 {
 
+   public function updateDataLampiran(int $id, array $post): array
+   {
+      try {
+         $data = $this->cleanDataSubmit(['file_name'], $post);
+         $data['update_at'] = new RawSql('now()');
+
+         $table = $this->db->table('tb_attachments');
+         $table->where('id', $id);
+         $table->update($data);
+
+         return ['status' => true, 'content' => $this->getDaftarLampiran($post['note_id']), 'message' => 'Data berhasil disimpan.'];
+      } catch (\Exception $e) {
+         return ['status' => false, 'message' => $e->getMessage()];
+      }
+   }
+
+   public function deleteLampiran(int $id): array
+   {
+      try {
+         $note_id = $this->db->table('tb_attachments')
+            ->select('note_id')
+            ->where('id', $id)
+            ->get()
+            ->getRow()
+            ->note_id ?? null;
+
+         $table = $this->db->table('tb_attachments');
+         $table->where('id', $id);
+         $table->delete();
+
+         return ['status' => true, 'content' => $this->getDaftarLampiran($note_id), 'message' => 'Data berhasil dihapus.'];
+      } catch (\Exception $e) {
+         return ['status' => false, 'message' => $e->getMessage()];
+      }
+   }
+
+   public function createDataLampiran(array $post): array
+   {
+      try {
+         $data = $this->cleanDataSubmit(['note_id', 'file_name', 'file_path'], $post);
+         $data['create_at'] = new RawSql('now()');
+
+         $table = $this->db->table('tb_attachments');
+         $table->insert($data);
+
+         return ['status' => true, 'message' => 'Data berhasil disimpan.', 'content' => $this->getDaftarLampiran($post['note_id'])];
+      } catch (\Exception $e) {
+         return ['status' => false, 'message' => $e->getMessage()];
+      }
+   }
+
+   private function getDaftarLampiran(int $note_id): array
+   {
+      $table = $this->db->table('tb_attachments');
+      $table->where('note_id', $note_id);
+
+      $get = $table->get();
+      $result = $get->getResultArray();
+      $fieldNames = $get->getFieldNames();
+      $get->freeResult();
+
+      $response = [];
+      foreach ($result as $key => $val) {
+         foreach ($fieldNames as $field) {
+            $response[$key][$field] = $val[$field] ? trim($val[$field]) : (string) $val[$field];
+         }
+      }
+      return $response;
+   }
+
+   public function submitButirTugas(array $post): array
+   {
+      try {
+         $table = $this->db->table('tb_action_item_details');
+         $table->where('note_id', $post['note_id']);
+         $table->where('assigned_to', $post['assigned_to']);
+
+         $found = $table->countAllResults() > 0 ? true : false;
+
+         if ($found) {
+            $this->db->table('tb_action_item_details')
+               ->where('note_id', $post['note_id'])
+               ->where('assigned_to', $post['assigned_to'])
+               ->update([
+                  'description' => htmlentities($post['description']),
+                  'due_date' => $post['due_date'],
+                  'update_at' => new RawSql('now()')
+               ]);
+         } else {
+            $this->db->table('tb_action_item_details')
+               ->insert([
+                  'note_id' => $post['note_id'],
+                  'description' => htmlentities($post['description']),
+                  'assigned_to' => $post['assigned_to'],
+                  'due_date' => $post['due_date'],
+                  'create_at' => new RawSql('now()')
+               ]);
+         }
+
+         return ['status' => true, 'message' => 'Data berhasil disimpan.'];
+      } catch (\Exception $e) {
+         return ['status' => false, 'message' => $e->getMessage()];
+      }
+   }
+
    public function updateHasilKeputusan(array $post): array
    {
       try {
@@ -89,12 +194,14 @@ class Notulen extends Common
    {
       try {
          $table = $this->db->table('tb_notes t');
-         $table->select('t.id as note_id, t.title, t.meeting_date, t.agenda, t.discussion_points, t.decisions, t2.full_name as pemimpin, t2.username as nip_pemimpin, t3.full_name as moderator, t3.username as nip_moderator, t.banner_image, coalesce(t4.kategori, \'[]\') as kategori, coalesce(t5.peserta, \'[]\') as peserta, coalesce(t6.presensi, \'[]\') as presensi');
+         $table->select('t.id as note_id, t.title, t.meeting_date, t.agenda, t.discussion_points, t.decisions, t2.full_name as pemimpin, t2.username as nip_pemimpin, t3.full_name as moderator, t3.username as nip_moderator, t.banner_image, coalesce(t4.kategori, \'[]\') as kategori, coalesce(t5.peserta, \'[]\') as peserta, coalesce(t6.presensi, \'[]\') as presensi, coalesce(taid.butir_tugas, \'[]\') as butir_tugas, coalesce(ta.lampiran, \'[]\') as lampiran');
          $table->join('tb_users t2', 't2.id = t.pemimpin_id', 'left');
          $table->join('tb_users t3', 't3.id = t.moderator_id', 'left');
          $table->join('(' . new RawSql($this->prepareSubQueryKategori()) . ') t4', 't4.note_id = t.id', 'left');
          $table->join('(' . new RawSql($this->prepareSubQueryPeserta()) . ') t5', 't5.note_id = t.id', 'left');
          $table->join('(' . new RawSql($this->prepareSubQueryPresensi()) . ') t6', 't6.note_id = t.id', 'left');
+         $table->join('(' . new RawSql($this->prepareSubQueryButirTugas()) . ') taid', 'taid.note_id = t.id', 'left');
+         $table->join('(' . new RawSql($this->prepareSubQueryLampiran()) . ') ta', 'ta.note_id = t.id', 'left');
          $table->where('t.id', $id);
 
          $get = $table->get();
@@ -102,7 +209,7 @@ class Notulen extends Common
          $fieldNames = $get->getFieldNames();
          $get->freeResult();
 
-         $field_decode_json = ['kategori', 'peserta', 'presensi'];
+         $field_decode_json = ['kategori', 'peserta', 'presensi', 'butir_tugas', 'lampiran'];
 
          $response = [];
          if (isset($data)) {
@@ -119,6 +226,35 @@ class Notulen extends Common
       } catch (\Exception $e) {
          return ['status' => false, 'message' => $e->getMessage()];
       }
+   }
+
+   private function prepareSubQueryLampiran(): string
+   {
+      $table = $this->db->table('tb_attachments');
+      $table->select('note_id,
+         json_agg(json_build_object(
+            \'id\', id,
+            \'file_name\', file_name,
+            \'file_path\', file_path
+         )) as lampiran');
+      $table->groupBy('note_id');
+
+      return $table->getCompiledSelect();
+   }
+
+   private function prepareSubQueryButirTugas(): string
+   {
+      $table = $this->db->table('tb_action_item_details taid');
+      $table->select('taid.note_id,
+         json_agg(json_build_object(
+            \'description\', taid.description,
+            \'assigned_to\', taid.assigned_to,
+            \'due_date\', taid.due_date,
+            \'status\', taid.status
+         )) as butir_tugas');
+      $table->groupBy('taid.note_id');
+
+      return $table->getCompiledSelect();
    }
 
    private function prepareSubQueryPresensi(): string
@@ -375,7 +511,7 @@ class Notulen extends Common
       return $table->getCompiledSelect();
    }
 
-   private function prepareSubQueryPeserta(): string
+   private function prepareSubQueryPeserta($status_participants = false): string
    {
       $table = $this->db->table('tb_participants t');
       $table->select('t.note_id,
@@ -388,7 +524,9 @@ class Notulen extends Common
             \'status\', t.status_participants
          )) as peserta');
       $table->join('tb_users t2', 't2.id = t.user_id');
-      $table->where('t.status_participants', 'peserta');
+      if ($status_participants) {
+         $table->where('t.status_participants', 'peserta');
+      }
       $table->groupBy('t.note_id');
 
       return $table->getCompiledSelect();
@@ -401,7 +539,7 @@ class Notulen extends Common
       $table->join('tb_users t2', 't2.id = t.pemimpin_id', 'left');
       $table->join('tb_users t3', 't3.id = t.moderator_id', 'left');
       $table->join('(' . new RawSql($this->prepareSubQueryKategori()) . ') t4', 't4.note_id = t.id', 'left');
-      $table->join('(' . new RawSql($this->prepareSubQueryPeserta()) . ') t5', 't5.note_id = t.id', 'left');
+      $table->join('(' . new RawSql($this->prepareSubQueryPeserta(true)) . ') t5', 't5.note_id = t.id', 'left');
       $this->searchData($table, $post, ['t.title', 't.agenda']);
       $table->orderBy('t.id', 'desc');
       $table->limit((int) $post['limit'], (int) $post['offset']);

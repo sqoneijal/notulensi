@@ -48,7 +48,7 @@ const Peserta = () => {
    };
 
    return (
-      <Table size="sn">
+      <Table>
          <thead>
             <tr>
                <th className="text-center" style={{ width: "5%" }}>
@@ -68,7 +68,7 @@ const Peserta = () => {
                of={module.peserta}
                render={(row, index) => {
                   return (
-                     <tr key={row.nip}>
+                     <tr key={row.nip} style={{ verticalAlign: "middle" }}>
                         <td className="text-center">{index + 1}</td>
                         <td>{row.nip}</td>
                         <td>{row.nama}</td>
@@ -76,8 +76,9 @@ const Peserta = () => {
                         <td className="text-center">{renderPresensi(getStatusPresesnsi(module.presensi)?.[row.participants_id])}</td>
                         <td className="text-center">
                            <Form.Select
+                              id={`status-${index}`}
                               size="sm"
-                              className="text-center"
+                              className="text-center p-0 border-0"
                               value={getStatusPresensi(getStatusPresesnsi(module.presensi)?.[row.participants_id])}
                               onChange={(e) =>
                                  handleChangeStatus({
