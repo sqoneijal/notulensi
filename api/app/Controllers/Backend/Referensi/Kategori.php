@@ -17,7 +17,7 @@ class Kategori extends BaseController
    public function index(): object
    {
       $model = new Model();
-      $content = $model->getData();
+      $content = $model->getData($this->request->getGet());
       return $this->respond($content);
    }
 
@@ -28,20 +28,46 @@ class Kategori extends BaseController
       return $this->respond($content);
    }
 
+   public function update(int $id): object
+   {
+      $submit = [];
+      $validation = $this->validation();
+      if ($validation['status']) {
+         $model = new Model();
+         $submit = $model->updateData($id, $this->request->getJSON(true));
+      }
+
+      return $this->respond(array_merge($validation, $submit));
+   }
+
    public function create(): object
+   {
+      $submit = [];
+      $validation = $this->validation();
+      if ($validation['status']) {
+         $model = new Model();
+         $submit = $model->createData($this->request->getPost());
+      }
+
+      return $this->respond(array_merge($validation, $submit));
+   }
+
+   private function validation(): array
    {
       $response = ['status' => false, 'errors' => []];
 
       $validation = new Validate();
-      if ($this->validate($validation->submit())) {
-         $model = new Model();
-         $submit = $model->submit($this->request->getPost());
 
-         $response = array_merge($submit, ['errors' => []]);
+      $input = $this->request->getMethod() === 'POST'
+         ? $this->request->getPost()
+         : $this->request->getJSON(true);
+
+      if ($this->validateData($input, $validation->submit())) {
+         $response = ['errors' => [], 'status' => true];
       } else {
          $response['message'] = 'Tolong periksa kembali inputan anda!';
          $response['errors'] = \Config\Services::validation()->getErrors();
       }
-      return $this->respond($response);
+      return $response;
    }
 }

@@ -1,15 +1,16 @@
 import nav from "@/nav_path";
-import { setActionButton } from "@/redux";
+import { setActionButton, setModule } from "@/redux";
 import iconly_sprite from "@assets/images/iconly-sprite.svg";
 import { Each } from "@helpers/each";
 import keycloakInstance from "@helpers/keycloak";
 import { useEffect, useRef } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Link, useLocation } from "react-router";
 import ResizeObserver from "resize-observer-polyfill";
 import SimpleBar from "simplebar";
 
 const Sidebar = () => {
+   const { module } = useSelector((e) => e.redux);
    const simplebarRef = useRef(null);
    const pinRefs = useRef([]);
    const dispatch = useDispatch();
@@ -159,7 +160,10 @@ const Sidebar = () => {
 
    const handleOnClickNav = (row) => {
       keycloakInstance.updateToken(70);
-      if (row.path !== location.pathname && typeof row.child === "undefined") dispatch(setActionButton({}));
+      if (row.path !== location.pathname && typeof row.child === "undefined") {
+         dispatch(setActionButton({}));
+         dispatch(setModule({ ...module, detailUpdate: {} }));
+      }
    };
 
    const setArrowIcon = (childElement) => {

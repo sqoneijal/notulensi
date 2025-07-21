@@ -35,6 +35,11 @@ const cariPegawai = async (str) => {
             pegawai {
                id
                nama
+               kontak {
+                  emailPribadi
+                  emailUinar
+                  noHp
+               }
             }
          }
       }`;

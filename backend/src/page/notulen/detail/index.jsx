@@ -1,0 +1,82 @@
+import { setActionButton, setModule } from "@/redux";
+import PageLoader from "@helpers/pageloader";
+import { get } from "@helpers/request";
+import { useEffect, useState } from "react";
+import { Card, Col, Row, Tab, Tabs } from "react-bootstrap";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate, useParams } from "react-router";
+import ButirTugas from "./butirTugas";
+import HasilDiskusi from "./hasilDiskusi";
+import Keputusan from "./keputusan";
+import ModalPemberianTugas from "./modalPemberianTugas";
+import Peserta from "./peserta";
+import Umum from "./umum";
+
+const Index = () => {
+   const { module } = useSelector((e) => e.redux);
+   const { id } = useParams();
+   const navigate = useNavigate();
+   const dispatch = useDispatch();
+
+   const [{ isLoading }, setState] = useState({
+      isLoading: true,
+   });
+
+   const getDetail = (id) => {
+      const fetch = get(`/notulen/${id}`);
+      fetch.then((res) => {
+         const { data } = res;
+
+         if (data.status) {
+            dispatch(setModule({ ...module, ...data.content }));
+            dispatch(
+               setActionButton({
+                  type: "back",
+                  path: "/notulen",
+                  label: "Kembali",
+                  className: "btn-danger",
+               })
+            );
+         } else {
+            navigate("/notulen");
+         }
+      });
+      fetch.finally(() => setState((prev) => ({ ...prev, isLoading: false })));
+   };
+
+   useEffect(() => {
+      getDetail(id);
+      return () => {};
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+   }, [id]);
+
+   const navTabs = [
+      { event: "umum", title: "Umum", element: <Umum /> },
+      { event: "peserta", title: "Peserta Rapat", element: <Peserta /> },
+      { event: "butir-tugas", title: "Butir Tugas", element: <ButirTugas /> },
+      { event: "hasil-diskusi", title: "Poin - Poin Diskusi", element: <HasilDiskusi /> },
+      { event: "keputusan", title: "Hasil Keputusan", element: <Keputusan /> },
+   ];
+
+   return isLoading ? (
+      <PageLoader />
+   ) : (
+      <Row>
+         <Col xs={12}>
+            <Card>
+               <Card.Body>
+                  <ModalPemberianTugas />
+                  <Tabs defaultActiveKey="umum" id="umum" className="mb-3" transition={true}>
+                     {navTabs.map((tab) => (
+                        <Tab eventKey={tab.event} title={tab.title} key={tab.event}>
+                           {tab.element}
+                        </Tab>
+                     ))}
+                  </Tabs>
+               </Card.Body>
+            </Card>
+         </Col>
+      </Row>
+   );
+};
+export default Index;

@@ -15,17 +15,20 @@ const confirm = async (url) => {
       confirmButtonText: "Ya, hapus saja!",
       cancelButtonText: "Batal",
    }).then((result) => {
-      if (result.isConfirmed) {
-         const submit = _delete(url);
-         submit.then((res) => {
-            const { data } = res;
-            Swal.fire({
-               title: "Deleted!",
-               text: data.message,
-               icon: data.status ? "success" : "error",
-            });
-         });
+      if (!result.isConfirmed) {
+         return;
       }
+
+      const submit = _delete(url);
+      submit.then((res) => {
+         const { data } = res;
+         Swal.fire({
+            title: "Deleted!",
+            text: data.message,
+            icon: data.status ? "success" : "error",
+         });
+      });
+      return submit;
    });
 };
 export { confirm };

@@ -1,8 +1,9 @@
 import React from "react";
 
 const Dashboard = React.lazy(() => import("@page/dashboard"));
-const Notulen = React.lazy(() => import("@page/notulen/lists"));
+const Notulen = React.lazy(() => import("@page/notulen"));
 const NotulenForms = React.lazy(() => import("@page/notulen/forms"));
+const NotulenDetail = React.lazy(() => import("@page/notulen/detail"));
 
 // referensi
 const ReferensiKategori = React.lazy(() => import("@page/referensi/kategori"));
@@ -13,6 +14,7 @@ const routes = [
    { path: "/dashboard", name: "Dashboard", element: Dashboard },
    { path: "/notulen", name: "Notulen", element: Notulen },
    { path: "/notulen/forms", name: "Notulen", element: NotulenForms },
+   { path: "/notulen/detail/:id", name: "Notulen", element: NotulenDetail },
    { path: "/referensi/kategori", name: "Kategori", element: ReferensiKategori },
    { path: "/referensi/kategori/forms", name: "Kategori", element: ReferensiKategoriForms },
 ];

@@ -14,19 +14,85 @@ class Notulen extends BaseController
       return respondCors($this->response)->setStatusCode(200);
    }
 
+   public function updateHasilKeputusan(): object
+   {
+      $model = new Model();
+      $content = $model->updateHasilKeputusan($this->request->getPost());
+      return $this->respond($content);
+   }
+
+   public function updateHasilDiskusi(): object
+   {
+      $model = new Model();
+      $content = $model->updateHasilDiskusi($this->request->getPost());
+      return $this->respond($content);
+   }
+
+   public function updateStatusPresensi(): object
+   {
+      $model = new Model();
+      $content = $model->updateStatusPresensi($this->request->getPost());
+      return $this->respond($content);
+   }
+
+   public function uploadBanner(): void
+   {
+      $post = $this->request->getPost();
+      $banner_file = $this->request->getFile('banner_file');
+      if ($banner_file) {
+         $post['banner_image'] = cdn_upload($banner_file, 'banner');
+      }
+
+      $model = new Model();
+      $model->uploadBanner($post);
+   }
+
+   public function show(int $id): object
+   {
+      $model = new Model();
+      $content = $model->getDetail($id);
+      return $this->respond($content);
+   }
+
+   public function delete(int $id): object
+   {
+      $model = new Model();
+      $content = $model->deleteData($id);
+      return $this->respond($content);
+   }
+
    public function index(): object
    {
       $model = new Model();
-      $content = $model->getData();
+      $content = $model->getData($this->request->getGet());
       return $this->respond($content);
+   }
+
+   public function new(): object
+   {
+      $model = new Model();
+      $content = $model->getDropdown();
+      return $this->respond($content);
+   }
+
+   public function update(int $id): object
+   {
+      $submit = [];
+      $validation = $this->validation();
+      if ($validation['status']) {
+         $post = $this->request->getJSON(true);
+         $model = new Model();
+         $submit = $model->updateData($id, $post);
+      }
+
+      return $this->respond(array_merge($validation, $submit));
    }
 
    public function create(): object
    {
-      $response = ['status' => false, 'errors' => []];
-
-      $validation = new Validate();
-      if ($this->validate($validation->submit())) {
+      $submit = [];
+      $validation = $this->validation();
+      if ($validation['status']) {
          $post = $this->request->getPost();
 
          $banner_file = $this->request->getFile('banner_file');
@@ -35,14 +101,28 @@ class Notulen extends BaseController
          }
 
          $model = new Model();
-         $submit = $model->submit($post);
+         $submit = $model->createData($post);
+      }
 
-         $response = array_merge($submit, ['errors' => []]);
+      return $this->respond(array_merge($validation, $submit));
+   }
+
+   private function validation()
+   {
+      $response = ['status' => false, 'errors' => []];
+
+      $validation = new Validate();
+
+      $input = $this->request->getMethod() === 'POST'
+         ? $this->request->getPost()
+         : $this->request->getJSON(true);
+
+      if ($this->validateData($input, $validation->submit())) {
+         $response = ['errors' => [], 'status' => true];
       } else {
          $response['message'] = 'Tolong periksa kembali inputan anda!';
          $response['errors'] = \Config\Services::validation()->getErrors();
       }
-
-      return $this->respond($response);
+      return $response;
    }
 }

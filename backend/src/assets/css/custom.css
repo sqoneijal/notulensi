@@ -1,5 +1,7 @@
-.gridjs-table > .gridjs-tbody > tr > td:last-child {
+.gridjs-thead > tr > th:last-child,
+.gridjs-tbody > tr > td:last-child {
    text-align: center;
+   width: 6%;
 }
 .gridjs-table > .gridjs-tbody > tr > td:last-child > span > input.jsgrid-edit-button {
    background-position: -2px -122px;

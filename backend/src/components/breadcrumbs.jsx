@@ -1,14 +1,16 @@
+import { setModule } from "@/redux";
 import { Col, Container, Row } from "react-bootstrap";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router";
 
 const Breadcrumbs = () => {
-   const { actionButton } = useSelector((e) => e.redux);
+   const { actionButton, module } = useSelector((e) => e.redux);
+   const dispatch = useDispatch();
 
    const renderActionButton = (item) => {
       if (Object.keys(item).length > 0 && (item.type === "add" || item.type === "back")) {
          return (
-            <Link to={item.path} className={`btn ${item.className} fw-bold`}>
+            <Link to={item.path} className={`btn ${item.className} fw-bold`} onClick={() => dispatch(setModule({ ...module, detailUpdate: {} }))}>
                {item.label}
             </Link>
          );

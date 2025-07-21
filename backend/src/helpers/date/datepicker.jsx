@@ -21,6 +21,7 @@ export default function DatePick({ ...config }) {
             placeholderText="Pilih tanggal disini..."
             fixedHeight
             dateFormat="dd-MM-yyyy hh:mm aa"
+            autoComplete="off"
             {...config}
          />
          <Form.Control.Feedback type="invalid" style={{ display: errors[name] ? "block" : "none" }}>

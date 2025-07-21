@@ -2,6 +2,7 @@ import { setActionButton, setModule } from "@/redux";
 import { confirm } from "@helpers/confirm_delete";
 import Grid from "@helpers/grid_table";
 import { h } from "gridjs";
+import moment from "moment";
 import { useEffect, useRef } from "react";
 import { Col, Row } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
@@ -13,16 +14,11 @@ const Index = () => {
    const gridRef = useRef(null);
    const navigate = useNavigate();
 
-   const handleEdit = (row) => {
-      dispatch(setModule({ ...module, detailUpdate: row }));
-      navigate(`/referensi/kategori/forms`);
-   };
-
    useEffect(() => {
       dispatch(
          setActionButton({
             type: "add",
-            path: "/referensi/kategori/forms",
+            path: "/notulen/forms",
             label: "Tambah Data",
             className: "btn-primary",
          })
@@ -36,9 +32,26 @@ const Index = () => {
             <Grid
                columns={[
                   {
-                     name: "Nama Kategori",
-                     data: (row) => row.category_name,
+                     name: "Judul",
+                     data: (row) => {
+                        return h(
+                           "a",
+                           {
+                              class: "fw-bold",
+                              href: "#",
+                              onClick: (e) => {
+                                 e.preventDefault();
+                                 navigate(`/notulen/detail/${row.id}`);
+                              },
+                           },
+                           row.title
+                        );
+                     },
                   },
+                  { name: "Agenda", data: (row) => row.agenda },
+                  { name: "Waktu", data: (row) => moment(row.meeting_date).format("DD-MM-YYYY hh:mm A") },
+                  { name: "Pemimpin", data: (row) => row.pemimpin },
+                  { name: "Moderator", data: (row) => row.moderator },
                   {
                      id: "aksi",
                      sort: false,
@@ -55,14 +68,17 @@ const Index = () => {
                               className: "jsgrid-button jsgrid-edit-button",
                               type: "button",
                               title: "Edit",
-                              onClick: () => handleEdit(row),
+                              onClick: () => {
+                                 dispatch(setModule({ ...module, detailUpdate: row }));
+                                 return navigate(`/notulen/forms`);
+                              },
                            }),
                            h("input", {
                               className: "jsgrid-button jsgrid-delete-button",
                               type: "button",
                               title: "Delete",
-                              onClick: () => {
-                                 const send = confirm(`/referensi/kategori/${row.id}`);
+                              onCLick: () => {
+                                 const send = confirm(`/notulen/${row.id}`);
                                  send.then((res) => {
                                     if (typeof res !== "undefined") {
                                        const { data } = res;
@@ -74,7 +90,7 @@ const Index = () => {
                         ),
                   },
                ]}
-               url="/referensi/kategori"
+               url="/notulen"
                gridRef={gridRef}
             />
          </Col>

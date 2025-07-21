@@ -21,26 +21,31 @@ class Kategori extends Common
       }
    }
 
-   public function submit(array $post): array
+   public function updateData(int $id, array $post): array
    {
       try {
-         $fields = ['category_name'];
-         foreach ($fields as $field) {
-            if (@$post[$field]) {
-               $data[$field] = $post[$field];
-            } else {
-               $data[$field] = null;
-            }
-         }
+         $data = $this->cleanDataSubmit(['category_name'], $post);
+         $data['update_at'] = new RawSql('now()');
 
          $table = $this->db->table('tb_categories');
+         $table->where('id', $id);
+         $table->update($data);
 
-         if (isset($post['id'])) {
-         } else {
-            $data['create_at'] = new RawSql('now()');
+         return ['status' => true, 'message' => 'Data berhasil disimpan.'];
+      } catch (\Exception $e) {
+         return ['status' => false, 'message' => $e->getMessage()];
+      }
+   }
 
-            $table->insert($data);
-         }
+   public function createData(array $post): array
+   {
+      try {
+         $data = $this->cleanDataSubmit(['category_name'], $post);
+         $data['create_at'] = new RawSql('now()');
+
+         $table = $this->db->table('tb_categories');
+         $table->insert($data);
+
          return ['status' => true, 'message' => 'Data berhasil disimpan.'];
       } catch (\Exception $e) {
          return ['status' => false, 'message' => $e->getMessage()];
@@ -53,10 +58,12 @@ class Kategori extends Common
       return $table->countAllResults();
    }
 
-   public function getData(): array
+   public function getData(array $post): array
    {
       $table = $this->db->table('tb_categories');
+      $this->searchData($table, $post, ['category_name']);
       $table->orderBy('id', 'desc');
+      $table->limit((int) $post['limit'], (int) $post['offset']);
 
       $get = $table->get();
       $result = $get->getResultArray();

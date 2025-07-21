@@ -38,8 +38,8 @@ function App() {
          if (Object.keys(user).length > 0) {
             cariPegawai(user.preferred_username).then((res) => {
                if (res.length > 0) {
-                  const simpeg = res[0];
-                  dispatch(setInit({ user, simpeg, token: { Authorization: `Bearer ${keycloak.token}` } }));
+                  const pemimpin = res[0];
+                  dispatch(setInit({ user, pemimpin, token: { Authorization: `Bearer ${keycloak.token}` } }));
                   setState({ isLoadingInitUser: false });
                   return;
                }
