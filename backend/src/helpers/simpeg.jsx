@@ -1,8 +1,6 @@
 import axios from "axios";
 import toast from "react-hot-toast";
 
-const headers = { "Content-Type": "application/json" };
-
 const abortSignal = (timeoutMs) => {
    const abortController = new AbortController();
    setTimeout(() => abortController.abort(), timeoutMs || 0);
@@ -28,7 +26,7 @@ const mutex = {
    },
 };
 
-const cariPegawai = async (str) => {
+const cariPegawai = async (str, token) => {
    const query = `
       query Pegawai($filter: PegawaiFilterInput) {
          daftarPegawai(filter: $filter) {
@@ -59,7 +57,10 @@ const cariPegawai = async (str) => {
          variables,
       },
       {
-         headers,
+         headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+         },
          signal: abortSignal(200_000),
       }
    );

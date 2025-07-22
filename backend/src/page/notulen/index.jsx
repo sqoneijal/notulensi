@@ -51,7 +51,7 @@ const Index = () => {
                   { name: "Agenda", data: (row) => row.agenda },
                   { name: "Waktu", data: (row) => moment(row.meeting_date).format("DD-MM-YYYY hh:mm A") },
                   { name: "Pemimpin", data: (row) => row.pemimpin },
-                  { name: "Moderator", data: (row) => row.moderator },
+                  { name: "Petugas", data: (row) => row.moderator },
                   {
                      id: "aksi",
                      sort: false,

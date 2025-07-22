@@ -11,7 +11,7 @@ class Notulen extends Common
    public function updateDataLampiran(int $id, array $post): array
    {
       try {
-         $data = $this->cleanDataSubmit(['file_name'], $post);
+         $data = $this->cleanDataSubmit(['file_name', 'file_type'], $post);
          $data['update_at'] = new RawSql('now()');
 
          $table = $this->db->table('tb_attachments');
@@ -47,7 +47,7 @@ class Notulen extends Common
    public function createDataLampiran(array $post): array
    {
       try {
-         $data = $this->cleanDataSubmit(['note_id', 'file_name', 'file_path'], $post);
+         $data = $this->cleanDataSubmit(['note_id', 'file_name', 'file_path', 'file_type'], $post);
          $data['create_at'] = new RawSql('now()');
 
          $table = $this->db->table('tb_attachments');
@@ -288,7 +288,7 @@ class Notulen extends Common
    public function updateData(int $id, array $post): array
    {
       try {
-         $data = $this->cleanDataSubmit(['title', 'agenda', 'lokasi'], $post);
+         $data = $this->cleanDataSubmit(['title', 'agenda', 'lokasi', 'embed_youtube'], $post);
 
          $cleanedInput = preg_replace('/\s*\(.*\)$/', '', $post['meeting_date']);
 
@@ -349,7 +349,7 @@ class Notulen extends Common
    public function createData(array $post): array
    {
       try {
-         $data = $this->cleanDataSubmit(['title', 'agenda', 'banner_image', 'lokasi'], $post);
+         $data = $this->cleanDataSubmit(['title', 'agenda', 'banner_image', 'lokasi', 'embed_youtube'], $post);
 
          $cleanedInput = preg_replace('/\s*\(.*\)$/', '', $post['meeting_date']);
 
@@ -464,35 +464,25 @@ class Notulen extends Common
 
    private function insertPemimpinRapat(array $post): void
    {
-      $participants = [];
       if (!empty($post['pemimpin_id'])) {
-         array_push($participants, [
+         $this->db->table('tb_participants')->insert([
             'note_id' => $post['note_id'],
             'user_id' => $post['pemimpin_id'],
             'status_participants' => 'pemimpin',
             'create_at' => new RawSql('now()')
          ]);
       }
-
-      if (!empty($participants)) {
-         $this->db->table('tb_participants')->insert($participants);
-      }
    }
 
    private function insertModeratorRapat(array $post): void
    {
-      $participants = [];
       if (!empty($post['moderator_id'])) {
-         array_push($participants, [
+         $this->db->table('tb_participants')->insert([
             'note_id' => $post['note_id'],
             'user_id' => $post['moderator_id'],
             'status_participants' => 'moderator',
             'create_at' => new RawSql('now()')
          ]);
-      }
-
-      if (!empty($participants)) {
-         $this->db->table('tb_participants')->insert($participants);
       }
    }
 

@@ -39,8 +39,8 @@ const ButirTugas = () => {
                <th className="text-center" style={{ width: "2%" }}>
                   No
                </th>
-               <th>NIP</th>
-               <th style={{ width: "20%" }}>Nama</th>
+               <th style={{ width: "12%" }}>NIP</th>
+               <th>Nama</th>
                <th className="text-center" style={{ width: "10%" }}>
                   Tenggat Waktu
                </th>

@@ -18,7 +18,7 @@ const FormsLampiran = () => {
    });
 
    useEffect(() => {
-      if (openFormsLampiran && Object.keys(detailLampiran).length > 0) {
+      if (openFormsLampiran && typeof detailLampiran !== "undefined" && Object.keys(detailLampiran).length > 0) {
          setState((prev) => ({ ...prev, input: detailLampiran }));
       }
       return () => {};
@@ -38,19 +38,18 @@ const FormsLampiran = () => {
    };
 
    const handleFile = (file) => {
-      setState((prev) => ({ ...prev, input: { ...prev.input, file_lampiran: file } }));
+      setState((prev) => ({ ...prev, input: { ...prev.input, file_lampiran: file, file_type: file.type } }));
    };
 
    const createOrUpdate = async () => {
       const apiCall =
-         openFormsLampiran && Object.keys(detailLampiran).length > 0
+         openFormsLampiran && typeof detailLampiran !== "undefined" && Object.keys(detailLampiran).length > 0
             ? () => put(`/notulen/lampiran/${detailLampiran.id}`, { ...input, ...{ note_id: module.note_id } })
             : () => post("/notulen/lampiran", postValue({ ...input, ...{ note_id: module.note_id } }));
       return apiCall();
    };
 
-   const handleSubmit = async (e) => {
-      e.preventDefault();
+   const handleSubmit = async () => {
       setState((prev) => ({ ...prev, isSubmit: true }));
 
       try {
@@ -98,7 +97,7 @@ const FormsLampiran = () => {
             </Row>
          </Modal.Body>
          <Modal.Footer>
-            <Button variant="primary" onClick={handleSubmit} disabled={isSubmit}>
+            <Button variant="primary" onClick={() => (isSubmit ? null : handleSubmit())} disabled={isSubmit}>
                {isSubmit ? "Loading..." : "Simpan"}
             </Button>
          </Modal.Footer>

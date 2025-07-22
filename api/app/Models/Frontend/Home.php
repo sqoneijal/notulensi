@@ -16,8 +16,10 @@ class Home extends Common
 
    private function getBannerData(): array
    {
-      $table = $this->db->table('tb_notes');
-      $table->orderBy('meeting_date', 'desc');
+      $table = $this->db->table('tb_notes tn');
+      $table->select('tn.*, tu.full_name');
+      $table->join('tb_users tu', 'tu.id = tn.pemimpin_id');
+      $table->orderBy('tn.id', 'desc');
       $table->limit(1);
 
       $get = $table->get();

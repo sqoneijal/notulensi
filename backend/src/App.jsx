@@ -36,7 +36,7 @@ function App() {
 
          const { keycloak, user } = res;
          if (Object.keys(user).length > 0) {
-            cariPegawai(user.preferred_username).then((res) => {
+            cariPegawai(user.preferred_username, keycloak.token).then((res) => {
                if (res.length > 0) {
                   const pemimpin = res[0];
                   dispatch(setInit({ user, pemimpin, token: { Authorization: `Bearer ${keycloak.token}` } }));

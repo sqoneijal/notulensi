@@ -82,42 +82,41 @@ const Sidebar = () => {
 
       if (pinRefs?.current) {
          pinRefs.current.forEach((item) => {
-            const linkName = item.parentNode.querySelector("h6").innerHTML;
-            const initialLocalStorage = JSON.parse(localStorage.getItem("pins") || false);
+            const linkName = item.parentNode.querySelector("h6")?.innerHTML;
+            const localStoragePins = JSON.parse(localStorage.getItem("pins") || "[]");
 
-            if (initialLocalStorage?.includes(linkName)) {
+            if (Array.isArray(localStoragePins) && localStoragePins.includes(linkName)) {
                item.parentNode.classList.add("pined");
             }
 
             item.addEventListener("click", () => {
-               let localStoragePins = JSON.parse(localStorage.getItem("pins") || false);
-               item.parentNode.classList.toggle("pined");
+               let pins = JSON.parse(localStorage.getItem("pins") || "[]");
 
-               if (localStoragePins?.length) {
-                  if (item.parentNode.classList.contains("pined")) {
-                     if (!localStoragePins?.includes(linkName)) localStoragePins = [...localStoragePins, linkName];
-                  } else {
-                     localStoragePins?.includes(linkName) && localStoragePins.splice(localStoragePins.indexOf(linkName), 1);
-                  }
-                  localStorage.setItem("pins", JSON.stringify(localStoragePins));
+               // Pastikan array
+               if (!Array.isArray(pins)) pins = [];
+
+               const isPinned = item.parentNode.classList.toggle("pined");
+
+               if (isPinned) {
+                  if (!pins.includes(linkName)) pins.push(linkName);
                } else {
-                  localStorage.setItem("pins", JSON.stringify([linkName]));
+                  pins = pins.filter((name) => name !== linkName);
                }
+
+               localStorage.setItem("pins", JSON.stringify(pins));
 
                togglePinnedName();
 
                const topPos = item.offsetTop;
+               const sidebar = document.querySelector(".main-sidebar");
 
-               if (item.parentElement.parentElement.classList.contains("pined")) {
-                  scrollTo(document.getElementsByClassName("main-sidebar")[0], topPos - 30, 600);
-               } else {
-                  scrollTo(document.getElementsByClassName("main-sidebar")[0], item.parentNode.offsetTop - 30, 600);
-               }
+               scrollTo(sidebar, item.parentElement.parentElement.classList.contains("pined") ? topPos - 30 : item.parentNode.offsetTop - 30, 600);
             });
          });
 
          togglePinnedName();
       }
+
       return () => {};
    }, [simplebarRef, pinRefs]);
 

@@ -148,7 +148,7 @@ const Forms = () => {
                      disabled={true}
                   />
                   <AsyncFormTypeahead
-                     label="Moderator Rapat"
+                     label="Petugas Notulensi"
                      errors={errors}
                      name="moderator_id"
                      col={{ md: 6 }}
@@ -205,6 +205,16 @@ const Forms = () => {
                      value={input?.lokasi || ""}
                      onChange={(e) => setInput("lokasi", e.target.value)}
                      col={{ sm: 12 }}
+                  />
+               </Row>
+               <Row>
+                  <FormText
+                     label="Embed Youtube Link"
+                     name="embed_youtube"
+                     errors={errors}
+                     value={input?.embed_youtube || ""}
+                     onChange={(e) => setInput("embed_youtube", e.target.value)}
+                     col={{ md: 12 }}
                   />
                </Row>
                <Row>

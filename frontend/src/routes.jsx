@@ -1,6 +1,6 @@
 import React from "react";
 
-const Home = React.lazy(() => import("@views/home/index"));
+const Home = React.lazy(() => import("@page/home/index"));
 
 const routes = [{ path: "/", name: "Beranda", element: Home }];
 

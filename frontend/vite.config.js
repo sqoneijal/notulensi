@@ -12,7 +12,7 @@ export default defineConfig({
          "@helpers": path.resolve(__dirname, "src/helpers"),
          "@components": path.resolve(__dirname, "src/components"),
          "@assets": path.resolve(__dirname, "src/assets"),
-         "@views": path.resolve(__dirname, "src/views"),
+         "@page": path.resolve(__dirname, "src/page"),
       },
    },
 });
