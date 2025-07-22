@@ -3,19 +3,25 @@
 use CodeIgniter\Router\RouteCollection;
 
 $routes->group('backend', ['filter' => ['cors:api', 'keycloak-auth'], 'namespace' => 'App\Controllers\Backend'], static function (RouteCollection $routes): void {
-   $routes->delete('notulen/lampiran/(:num)', 'Notulen::deleteLampiran/$1');
-   $routes->post('notulen/lampiran', 'Notulen::createLampiran');
-   $routes->put('notulen/lampiran/(:num)', 'Notulen::updateLampiran/$1');
+   $routes->resource('dashboard');
+   $routes->options('dashboard', 'Dashboard::options');
 
-   $routes->options('notulen', 'Notulen::options');
-   $routes->options('notulen/(:any)', 'Notulen::options');
+
    $routes->resource('notulen');
+   $routes->options('notulen', 'Notulen::options');
 
-   $routes->post('notulen/upload-banner', 'Notulen::uploadBanner');
-   $routes->post('notulen/update-status-presensi', 'Notulen::updateStatusPresensi');
-   $routes->post('notulen/update-hasil-diskusi', 'Notulen::updateHasilDiskusi');
-   $routes->post('notulen/update-hasil-keputusan', 'Notulen::updateHasilKeputusan');
-   $routes->post('notulen/submit-butir-tugas', 'Notulen::submitButirTugas');
+   $routes->group('notulen', static function (RouteCollection $routes): void {
+      $routes->options('(:any)', 'Notulen::options');
+
+      $routes->post('upload-banner', 'Notulen::uploadBanner');
+      $routes->post('update-status-presensi', 'Notulen::updateStatusPresensi');
+      $routes->post('update-hasil-diskusi', 'Notulen::updateHasilDiskusi');
+      $routes->post('update-hasil-keputusan', 'Notulen::updateHasilKeputusan');
+      $routes->post('submit-butir-tugas', 'Notulen::submitButirTugas');
+      $routes->delete('lampiran/(:num)', 'Notulen::deleteLampiran/$1');
+      $routes->post('lampiran', 'Notulen::createLampiran');
+      $routes->put('lampiran/(:num)', 'Notulen::updateLampiran/$1');
+   });
 
    $routes->group('referensi', ['namespace' => 'App\Controllers\Backend\Referensi'], static function (RouteCollection $routes): void {
       $routes->options('kategori', 'Kategori::options');

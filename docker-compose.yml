@@ -22,3 +22,21 @@ services:
       environment:
          - NODE_ENV=production
       restart: always
+      depends_on:
+         - notulensi-api
+
+   notulensi-backend:
+      container_name: notulensi-backend
+      image: notulensi-backend
+      build:
+         context: ./backend
+         dockerfile: ./Dockerfile
+      volumes:
+         - ./backend/dist:/usr/share/nginx/html
+      ports:
+         - "1015:80"
+      environment:
+         - NODE_ENV=production
+      restart: always
+      depends_on:
+         - notulensi-api

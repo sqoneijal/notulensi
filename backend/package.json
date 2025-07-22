@@ -10,6 +10,11 @@
       "preview": "vite preview"
    },
    "dependencies": {
+      "@fullcalendar/core": "^6.1.18",
+      "@fullcalendar/daygrid": "^6.1.18",
+      "@fullcalendar/list": "^6.1.18",
+      "@fullcalendar/react": "^6.1.18",
+      "@fullcalendar/timegrid": "^6.1.18",
       "@reduxjs/toolkit": "^2.8.2",
       "@tinymce/tinymce-react": "^6.2.1",
       "axios": "^1.10.0",
