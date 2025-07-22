@@ -29,3 +29,8 @@ $routes->group('backend', ['filter' => ['cors:api', 'keycloak-auth'], 'namespace
       $routes->resource('kategori');
    });
 });
+
+$routes->group('frontend', ['filter' => ['cors:api'], 'namespace' => 'App\Controllers\Frontend'], static function (RouteCollection $routes): void {
+   $routes->resource('home');
+   $routes->options('home', 'CorsHandler::options');
+});

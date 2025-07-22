@@ -17,6 +17,8 @@ services:
       build:
          context: ./frontend
          dockerfile: ./Dockerfile
+      volumes:
+         - ./frontend/dist:/usr/share/nginx/html
       ports:
          - "1014:80"
       environment:

@@ -8,7 +8,7 @@ use App\Models\Frontend\Home as Model;
 class Home extends BaseController
 {
 
-   public function getData()
+   public function index(): object
    {
       $model = new Model();
       $data = $model->getData();

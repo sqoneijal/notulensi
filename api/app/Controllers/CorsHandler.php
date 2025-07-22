@@ -8,6 +8,6 @@ class CorsHandler extends BaseController
 {
    public function options()
    {
-      return respondCors(service('response'))->setStatusCode(200);
+      return respondCors($this->response)->setStatusCode(200);
    }
 }
