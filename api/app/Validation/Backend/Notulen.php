@@ -40,6 +40,10 @@ class Notulen
             'rules' => 'required',
             'label' => 'Agenda rapat'
          ],
+         'lokasi' => [
+            'rules' => 'required',
+            'label' => 'Lokasi rapat'
+         ],
       ];
    }
 }

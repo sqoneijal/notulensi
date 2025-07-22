@@ -1,17 +1,18 @@
 <?php
 
 use CodeIgniter\Router\RouteCollection;
+use App\Controllers\CorsHandler;
 
 $routes->group('backend', ['filter' => ['cors:api', 'keycloak-auth'], 'namespace' => 'App\Controllers\Backend'], static function (RouteCollection $routes): void {
    $routes->resource('dashboard');
-   $routes->options('dashboard', 'Dashboard::options');
+   $routes->options('dashboard', 'CorsHandler::options');
 
 
    $routes->resource('notulen');
-   $routes->options('notulen', 'Notulen::options');
+   $routes->options('notulen', 'CorsHandler::options');
 
    $routes->group('notulen', static function (RouteCollection $routes): void {
-      $routes->options('(:any)', 'Notulen::options');
+      $routes->options('(:any)', 'CorsHandler::options');
 
       $routes->post('upload-banner', 'Notulen::uploadBanner');
       $routes->post('update-status-presensi', 'Notulen::updateStatusPresensi');

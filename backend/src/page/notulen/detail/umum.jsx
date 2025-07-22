@@ -18,6 +18,7 @@ const Umum = () => {
             {detail("Pemimpin Rapat", `${module.pemimpin} | ${module.nip_pemimpin}`, { md: 6 })}
             {detail("Moderator Rapat", `${module.moderator} | ${module.nip_moderator}`, { md: 6 })}
          </Row>
+         <Row>{detail("Lokasi Rapat", module.lokasi, { md: 12 })}</Row>
       </React.Fragment>
    );
 };

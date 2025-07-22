@@ -1,5 +1,5 @@
 import { Date } from "@helpers/date";
-import { AsyncFormTypeahead, DropzoneUpload, FormText, FormTypeaheadMultiple } from "@helpers/forms";
+import { AsyncFormTypeahead, DropzoneUpload, FormText, FormTextArea, FormTypeaheadMultiple } from "@helpers/forms";
 import { msgError, msgSuccess } from "@helpers/message";
 import { post, postValue, put } from "@helpers/request";
 import { cariPegawai } from "@helpers/simpeg";
@@ -39,6 +39,7 @@ const Forms = () => {
                agenda: detailUpdate.agenda,
                meeting_date: detailUpdate.meeting_date,
                moderator: [{ value: detailUpdate.moderator_id, label: detailUpdate.moderator, id: detailUpdate.moderator_username }],
+               lokasi: detailUpdate.lokasi,
             },
             selected: {
                ...prev.selected,
@@ -194,6 +195,16 @@ const Forms = () => {
                      options={dropdown.daftarPesertaRapat}
                      onChange={(data) => setState((prev) => ({ ...prev, selected: { ...prev.selected, peserta_rapat: data } }))}
                      selected={selected.peserta_rapat}
+                  />
+               </Row>
+               <Row>
+                  <FormTextArea
+                     label="Lokasi Rapat"
+                     name="lokasi"
+                     errors={errors}
+                     value={input?.lokasi || ""}
+                     onChange={(e) => setInput("lokasi", e.target.value)}
+                     col={{ sm: 12 }}
                   />
                </Row>
                <Row>

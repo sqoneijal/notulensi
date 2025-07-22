@@ -194,7 +194,7 @@ class Notulen extends Common
    {
       try {
          $table = $this->db->table('tb_notes t');
-         $table->select('t.id as note_id, t.title, t.meeting_date, t.agenda, t.discussion_points, t.decisions, t2.full_name as pemimpin, t2.username as nip_pemimpin, t3.full_name as moderator, t3.username as nip_moderator, t.banner_image, coalesce(t4.kategori, \'[]\') as kategori, coalesce(t5.peserta, \'[]\') as peserta, coalesce(t6.presensi, \'[]\') as presensi, coalesce(taid.butir_tugas, \'[]\') as butir_tugas, coalesce(ta.lampiran, \'[]\') as lampiran');
+         $table->select('t.id as note_id, t.title, t.meeting_date, t.agenda, t.discussion_points, t.decisions, t2.full_name as pemimpin, t2.username as nip_pemimpin, t3.full_name as moderator, t3.username as nip_moderator, t.banner_image, coalesce(t4.kategori, \'[]\') as kategori, coalesce(t5.peserta, \'[]\') as peserta, coalesce(t6.presensi, \'[]\') as presensi, coalesce(taid.butir_tugas, \'[]\') as butir_tugas, coalesce(ta.lampiran, \'[]\') as lampiran, t.lokasi');
          $table->join('tb_users t2', 't2.id = t.pemimpin_id', 'left');
          $table->join('tb_users t3', 't3.id = t.moderator_id', 'left');
          $table->join('(' . new RawSql($this->prepareSubQueryKategori()) . ') t4', 't4.note_id = t.id', 'left');
@@ -288,7 +288,7 @@ class Notulen extends Common
    public function updateData(int $id, array $post): array
    {
       try {
-         $data = $this->cleanDataSubmit(['title', 'agenda'], $post);
+         $data = $this->cleanDataSubmit(['title', 'agenda', 'lokasi'], $post);
 
          $cleanedInput = preg_replace('/\s*\(.*\)$/', '', $post['meeting_date']);
 
@@ -349,7 +349,7 @@ class Notulen extends Common
    public function createData(array $post): array
    {
       try {
-         $data = $this->cleanDataSubmit(['title', 'agenda', 'banner_image'], $post);
+         $data = $this->cleanDataSubmit(['title', 'agenda', 'banner_image', 'lokasi'], $post);
 
          $cleanedInput = preg_replace('/\s*\(.*\)$/', '', $post['meeting_date']);
 

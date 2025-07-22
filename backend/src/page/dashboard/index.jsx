@@ -4,8 +4,11 @@ import PageLoader from "@helpers/pageloader";
 import { get } from "@helpers/request";
 import { useEffect, useState } from "react";
 import { Card, Col, Row } from "react-bootstrap";
+import { useNavigate } from "react-router";
 
 const Index = () => {
+   const navigate = useNavigate();
+
    const [{ isLoading, events }, setState] = useState({
       isLoading: true,
       events: [],
@@ -38,8 +41,7 @@ const Index = () => {
                      events={events}
                      eventTimeFormat={{ hour: "numeric", minute: "2-digit", meridiem: "short" }}
                      eventClick={(info) => {
-                        console.log(info.el);
-                        console.log(info);
+                        navigate(`/notulen/detail/${info.el.fcSeg.eventRange.def.publicId}`);
                      }}
                      eventMouseEnter={(info) => {
                         info.el.style.cursor = "pointer";
