@@ -1,4 +1,5 @@
 import SvgTextImage from "@components/SvgTextImage";
+import { potongString, stripTags } from "@helpers";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import DOMPurify from "dompurify";
@@ -9,7 +10,6 @@ import { Link } from "react-router";
 
 const Banner = ({ ...state }) => {
    const { banner } = state;
-   console.log(banner);
 
    useEffect(() => {
       AOS.init({
@@ -21,7 +21,7 @@ const Banner = ({ ...state }) => {
    const insertBreakAfterFirstWord = (text) => {
       const words = text.split(" ");
       if (words.length <= 1) return text;
-      return `${words[0]}<br/><span>${words.slice(1).join(" ")}</span>`;
+      return `${words[0]}<br/><span>${potongString(words.slice(1).join(" "), 40)}</span>`;
    };
 
    const rendererCountdown = ({ days, hours, minutes, seconds }) => {
@@ -54,7 +54,7 @@ const Banner = ({ ...state }) => {
       <section className="banner-section">
          <div className="bg bg-image" style={{ backgroundImage: `url('${banner.banner_image}')` }} />
          <div className="auto-container">
-            <div className="content-box">
+            <div className="content-box" style={{ paddingLeft: 0 }}>
                <div className="author-box">
                   <div className="inner-box">
                      <div className="sign" data-aos="fade-up" data-aos-delay="500">
@@ -66,7 +66,7 @@ const Banner = ({ ...state }) => {
                   </div>
                </div>
                <div style={{ width: "80%" }}>
-                  <h1
+                  <h2
                      className="title title-anim"
                      style={{
                         whiteSpace: "nowrap",
@@ -74,7 +74,7 @@ const Banner = ({ ...state }) => {
                         textOverflow: "ellipsis",
                         maxWidth: "100%",
                      }}
-                     title={DOMPurify.sanitize(insertBreakAfterFirstWord(banner.title), { format: "html5" })}
+                     title={stripTags(DOMPurify.sanitize(insertBreakAfterFirstWord(banner.title), { format: "html5" }))}
                      dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(insertBreakAfterFirstWord(banner.title), { format: "html5" }) }}
                   />
                   <div className="location-box" data-aos="fade-right" data-aos-delay="3100">

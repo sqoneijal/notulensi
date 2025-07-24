@@ -36,7 +36,7 @@ class Notulen extends BaseController
 
          $file_lampiran = $this->request->getFile('file_lampiran');
          if ($file_lampiran) {
-            $post['file_path'] = cdn_upload($file_lampiran, 'banner');
+            $post['file_path'] = cdn_upload($file_lampiran, 'lampiran');
          }
 
          $model = new Model();
