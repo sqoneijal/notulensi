@@ -28,5 +28,11 @@ $routes->group('backend', ['filter' => ['cors:api', 'keycloak-auth'], 'namespace
 });
 
 $routes->group('frontend', ['filter' => ['cors:api'], 'namespace' => 'App\Controllers\Frontend'], static function (RouteCollection $routes): void {
-   $routes->resource('home');
+   $routes->options('(:any)', 'App\Controllers\CorsHandler::options');
+
+   $routes->resource('home', ['only' => 'index']);
+
+   $routes->group('detail', static function (RouteCollection $routes): void {
+      $routes->resource('event');
+   });
 });

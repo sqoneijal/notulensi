@@ -5,6 +5,9 @@ namespace App\Controllers\Backend;
 use App\Controllers\BaseController;
 use App\Validation\Backend\Notulen as Validate;
 use App\Models\Backend\Notulen as Model;
+use Google\Client as Google_Client;
+use Google\Service\Drive as Google_Service_Drive;
+use Google\Service\Drive\DriveFile as Google_Service_Drive_DriveFile;
 
 class Notulen extends BaseController
 {

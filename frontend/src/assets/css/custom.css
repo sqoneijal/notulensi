@@ -1,0 +1,31 @@
+.text .popular-tags li {
+   position: relative;
+   display: inline-block;
+   margin: 0 9px 19px 0;
+}
+.text .popular-tags li span {
+   position: relative;
+   display: block;
+   color: #666666;
+   text-align: center;
+   font-size: 16px;
+   line-height: 20px;
+   padding: 14px 20px;
+   background: none;
+   font-weight: 400;
+   border: 1px solid #666666;
+   border-radius: 25px;
+   background-color: var(--theme-color-light);
+   transition: all 300ms ease;
+}
+.event-single-block .inner-box .content .location-box li {
+   margin: 0 10px 0 10px !important;
+   display: inline-block !important;
+   position: relative !important;
+}
+.event-single-block .inner-box .content .location-box {
+   display: inline-block !important;
+}
+.event-single-block .inner-box .content .location-box .icon {
+   padding-right: 5px;
+}
