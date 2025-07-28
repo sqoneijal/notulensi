@@ -31,8 +31,9 @@ $routes->group('frontend', ['filter' => ['cors:api'], 'namespace' => 'App\Contro
    $routes->options('(:any)', 'App\Controllers\CorsHandler::options');
 
    $routes->resource('home', ['only' => 'index']);
+   $routes->resource('event', ['only' => 'index']);
 
    $routes->group('detail', static function (RouteCollection $routes): void {
-      $routes->resource('event');
+      $routes->resource('event', ['only' => 'show']);
    });
 });

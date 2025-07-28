@@ -5,6 +5,7 @@
 @import url("fonts.css");
 @import url("fontawesome.css");
 @import url("flaticon.css");
+@import url("linear.css");
 
 :root {
    --theme-color-light: #ffffff;
@@ -2574,13 +2575,13 @@ Scroll To Top style
    color: inherit;
 }
 
-.moblie-search-active .search-popup {
+.mobile-search-active .search-popup {
    opacity: 1;
    visibility: visible;
    transform: scale(1);
    border-radius: 0%;
 }
-.moblie-search-active .search-popup .search-inner {
+.mobile-search-active .search-popup .search-inner {
    opacity: 1;
    transform: translateY(0);
    transition-delay: 500ms;

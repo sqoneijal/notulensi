@@ -8,6 +8,35 @@ use CodeIgniter\Database\RawSql;
 class Event extends Common
 {
 
+   public function getData(array $post): array
+   {
+      $table = $this->db->table('tb_notes tn');
+      $table->select('tn.id, tn.title, tn.meeting_date, tn.agenda, tn.banner_image, tn.lokasi, tn.embed_youtube, tu.full_name as pemimpin');
+      $table->join('tb_users tu', 'tu.id = tn.pemimpin_id', 'left');
+      $table->limit(10, (10 * intval($post['page'])));
+      $table->orderBy('tn.id', 'desc');
+
+      $get = $table->get();
+      $result = $get->getResultArray();
+      $fieldNames = $get->getFieldNames();
+      $get->freeResult();
+
+      $response = [];
+      foreach ($result as $key => $val) {
+         foreach ($fieldNames as $field) {
+            $response[$key][$field] = $val[$field] ? trim($val[$field]) : (string) $val[$field];
+         }
+      }
+      return ['content' => $response, 'total' => $this->hitungTotalData()];
+   }
+
+   private function hitungTotalData(): int
+   {
+      $table = $this->db->table('tb_notes');
+
+      return $table->countAllResults();
+   }
+
    public function getShowData(int $id): array
    {
       $table = $this->db->table('tb_notes tn');
