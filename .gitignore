@@ -10,3 +10,5 @@ backend/src/assets/fontawesome-free-6.3.0-web
 api/writable/service.json
 backend/prod.js
 backend/.env.production
+frontend/.env.production
+frontend/prod.js

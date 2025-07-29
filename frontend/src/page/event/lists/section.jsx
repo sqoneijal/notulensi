@@ -6,16 +6,16 @@ import moment from "moment";
 import React, { useEffect, useRef } from "react";
 import { Link } from "react-router";
 
-const Section = ({ content, getData, setState, bottomOfPage, currentPage }) => {
+const Section = ({ content, getData, setState, bottomOfPage, currentPage, totalData }) => {
    const paginationRender = useRef(null);
 
    useEffect(() => {
-      if (bottomOfPage) {
+      if (bottomOfPage && totalData > content.length) {
          getData(currentPage);
       }
       return () => setState((prev) => ({ ...prev, bottomOfPage: false }));
       // eslint-disable-next-line react-hooks/exhaustive-deps
-   }, [bottomOfPage]);
+   }, [bottomOfPage, content]);
 
    useEffect(() => {
       const observer = new IntersectionObserver(

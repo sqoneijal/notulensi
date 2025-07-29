@@ -47,6 +47,10 @@ const Grid_table = ({ columns, url, gridRef }) => {
                placeholder: "🔍 Cari...",
             },
             pagination: {
+               limit: 10,
+               server: {
+                  url: (prev, page, limit) => `${prev}?limit=${limit}&offset=${page * limit}`,
+               },
                showing: "😃 Displaying",
                results: () => "Records",
             },

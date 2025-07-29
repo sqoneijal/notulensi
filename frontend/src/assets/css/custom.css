@@ -29,3 +29,8 @@
 .event-single-block .inner-box .content .location-box .icon {
    padding-right: 5px;
 }
+#controlled-event button.nav-link {
+   font-weight: bold;
+   font-size: 20px;
+   color: #000;
+}

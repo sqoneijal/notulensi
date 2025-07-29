@@ -1,7 +1,15 @@
 import moment from "moment";
+import { useState } from "react";
+import { Tab, Tabs } from "react-bootstrap";
+import Diskusi from "./diskusi";
+import Keputusan from "./keputusan";
 import Peserta from "./peserta";
 
 const Single = ({ data }) => {
+   const [{ key }, setState] = useState({
+      key: "peserta",
+   });
+
    return (
       <section className="event-single">
          <div className="shape-fourty" />
@@ -30,7 +38,22 @@ const Single = ({ data }) => {
                      </div>
                   </div>
                </div>
-               <Peserta {...data} />
+               <Tabs
+                  id="controlled-event"
+                  activeKey={key}
+                  onSelect={(k) => setState((prev) => ({ ...prev, key: k }))}
+                  className="mb-3"
+                  transition={true}>
+                  <Tab eventKey="peserta" title="Peserta Rapat">
+                     <Peserta {...data} />
+                  </Tab>
+                  <Tab eventKey="diskusi" title="Diskusi">
+                     <Diskusi {...data} />
+                  </Tab>
+                  <Tab eventKey="keputusan" title="Keputusan">
+                     <Keputusan {...data} />
+                  </Tab>
+               </Tabs>
             </div>
          </div>
       </section>

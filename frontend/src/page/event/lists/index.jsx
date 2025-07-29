@@ -6,7 +6,7 @@ const Title = React.lazy(() => import("./title"));
 const Section = React.lazy(() => import("./section"));
 
 const Index = () => {
-   const [{ pageLoading, content, bottomOfPage, currentPage }, setState] = useState({
+   const [{ pageLoading, content, bottomOfPage, currentPage, totalData }, setState] = useState({
       pageLoading: true,
       content: [],
       bottomOfPage: false,
@@ -27,7 +27,7 @@ const Index = () => {
       fetch.finally(() => setState((prev) => ({ ...prev, pageLoading: false })));
    };
 
-   const props = { content, getData, setState, bottomOfPage, currentPage };
+   const props = { content, getData, setState, bottomOfPage, currentPage, totalData };
 
    useEffect(() => {
       getData();
