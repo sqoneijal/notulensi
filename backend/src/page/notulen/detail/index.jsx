@@ -13,6 +13,7 @@ import Lampiran from "./lampiran";
 import ModalDetailDeskripsiTugas from "./modalDetailDeskripsiTugas";
 import ModalPemberianTugas from "./modalPemberianTugas";
 import Peserta from "./peserta";
+import QrcodePresensi from "./qrcodePresensi";
 import Umum from "./umum";
 
 const Index = () => {
@@ -71,6 +72,7 @@ const Index = () => {
       { event: "hasil-diskusi", title: "Poin - Poin Diskusi", element: <HasilDiskusi /> },
       { event: "keputusan", title: "Hasil Keputusan", element: <Keputusan /> },
       { event: "lampiran", title: "Lampiran", element: <Lampiran /> },
+      { event: "qrcode", title: "QRCode Presensi", element: <QrcodePresensi /> },
    ];
 
    return isLoading ? (

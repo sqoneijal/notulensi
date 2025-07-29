@@ -2,6 +2,7 @@ import { Each } from "@helpers/each";
 import { msgError, msgSuccess } from "@helpers/message";
 import { post, postValue } from "@helpers/request";
 import moment from "moment";
+import React from "react";
 import { Badge, Form, Table } from "react-bootstrap";
 import { useSelector } from "react-redux";
 
@@ -48,62 +49,64 @@ const Peserta = () => {
    };
 
    return (
-      <Table>
-         <thead>
-            <tr>
-               <th className="text-center" style={{ width: "5%" }}>
-                  No
-               </th>
-               <th>NIP</th>
-               <th>Nama</th>
-               <th>Email</th>
-               <th className="text-center">Presensi</th>
-               <th className="text-center" style={{ width: "10%" }}>
-                  Status
-               </th>
-            </tr>
-         </thead>
-         <tbody>
-            <Each
-               of={module.peserta}
-               render={(row, index) => {
-                  return (
-                     <tr key={row.nip} style={{ verticalAlign: "middle" }}>
-                        <td className="text-center">{index + 1}</td>
-                        <td>{row.nip}</td>
-                        <td>{row.nama}</td>
-                        <td>{row.email}</td>
-                        <td className="text-center">{renderPresensi(getStatusPresesnsi(module.presensi)?.[row.participants_id])}</td>
-                        <td className="text-center">
-                           <Form.Select
-                              id={`status-${index}`}
-                              size="sm"
-                              className="text-center p-0 border-0"
-                              value={getStatusPresensi(getStatusPresesnsi(module.presensi)?.[row.participants_id])}
-                              onChange={(e) =>
-                                 handleChangeStatus({
-                                    note_id: module.note_id,
-                                    participant_id: row.participants_id,
-                                    status: e.target.value,
-                                 })
-                              }>
-                              <option value="">--pilih--</option>
-                              <Each
-                                 of={arrayStatus}
-                                 render={(row, index) => (
-                                    <option key={index} value={row.value}>
-                                       {row.label}
-                                    </option>
-                                 )}
-                              />
-                           </Form.Select>
-                        </td>
-                     </tr>
-                  );
-               }}
-            />
-         </tbody>
-      </Table>
+      <React.Fragment>
+         <Table>
+            <thead>
+               <tr>
+                  <th className="text-center" style={{ width: "5%" }}>
+                     No
+                  </th>
+                  <th>NIP</th>
+                  <th>Nama</th>
+                  <th>Email</th>
+                  <th className="text-center">Presensi</th>
+                  <th className="text-center" style={{ width: "10%" }}>
+                     Status
+                  </th>
+               </tr>
+            </thead>
+            <tbody>
+               <Each
+                  of={module.peserta}
+                  render={(row, index) => {
+                     return (
+                        <tr key={row.nip} style={{ verticalAlign: "middle" }}>
+                           <td className="text-center">{index + 1}</td>
+                           <td>{row.nip}</td>
+                           <td>{row.nama}</td>
+                           <td>{row.email}</td>
+                           <td className="text-center">{renderPresensi(getStatusPresesnsi(module.presensi)?.[row.participants_id])}</td>
+                           <td className="text-center">
+                              <Form.Select
+                                 id={`status-${index}`}
+                                 size="sm"
+                                 className="text-center p-0 border-0"
+                                 value={getStatusPresensi(getStatusPresesnsi(module.presensi)?.[row.participants_id])}
+                                 onChange={(e) =>
+                                    handleChangeStatus({
+                                       note_id: module.note_id,
+                                       participant_id: row.participants_id,
+                                       status: e.target.value,
+                                    })
+                                 }>
+                                 <option value="">--pilih--</option>
+                                 <Each
+                                    of={arrayStatus}
+                                    render={(row, index) => (
+                                       <option key={index} value={row.value}>
+                                          {row.label}
+                                       </option>
+                                    )}
+                                 />
+                              </Form.Select>
+                           </td>
+                        </tr>
+                     );
+                  }}
+               />
+            </tbody>
+         </Table>
+      </React.Fragment>
    );
 };
 export default Peserta;
