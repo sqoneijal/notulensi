@@ -526,7 +526,7 @@ class Notulen extends Common
    public function getData(array $post): array
    {
       $note_id = @$post['note_id'];
-      $where_note_id = [];
+      $where_note_id = [null];
       if ($note_id) {
          $where_note_id = explode(',', $note_id);
       }
@@ -538,7 +538,7 @@ class Notulen extends Common
       $table->join('(' . new RawSql($this->prepareSubQueryKategori()) . ') t4', 't4.note_id = t.id', 'left');
       $table->join('(' . new RawSql($this->prepareSubQueryPeserta(true)) . ') t5', 't5.note_id = t.id', 'left');
       $this->searchData($table, $post, ['t.title', 't.agenda']);
-      if (!empty($where_note_id) && $post['is_admin'] !== 'true') {
+      if (@$post['is_admin'] !== 'true' && !empty($where_note_id)) {
          $table->whereIn('t.id', $where_note_id);
       }
       $table->orderBy('t.id', 'desc');
@@ -564,13 +564,22 @@ class Notulen extends Common
 
       return [
          'results' => $response,
-         'total' => $this->countTotalData(),
+         'total' => $this->countTotalData($post),
       ];
    }
 
-   private function countTotalData(): int
+   private function countTotalData(array $post): int
    {
+      $note_id = @$post['note_id'];
+      $where_note_id = [null];
+      if ($note_id) {
+         $where_note_id = explode(',', $note_id);
+      }
+
       $table = $this->db->table('tb_notes');
+      if (@$post['is_admin'] !== 'true' && !empty($where_note_id)) {
+         $table->whereIn('id', $where_note_id);
+      }
 
       return $table->countAllResults();
    }
