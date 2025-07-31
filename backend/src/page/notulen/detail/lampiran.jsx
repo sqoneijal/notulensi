@@ -7,7 +7,8 @@ import { Button, Table } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 
 const Lampiran = () => {
-   const { module } = useSelector((e) => e.redux);
+   const { module, init } = useSelector((e) => e.redux);
+   const { user } = init;
    const dispatch = useDispatch();
 
    const [daftarLampiran, setDaftarLampiran] = useState([]);
@@ -56,7 +57,11 @@ const Lampiran = () => {
                                  className="jsgrid-button jsgrid-edit-button"
                                  onClick={(e) => {
                                     e.preventDefault();
-                                    dispatch(setModule({ ...module, openFormsLampiran: true, detailLampiran: row }));
+                                    if (user.preferred_username === row.user_modified) {
+                                       dispatch(setModule({ ...module, openFormsLampiran: true, detailLampiran: row }));
+                                    } else {
+                                       msgError("Anda tidak memiliki akses untuk melakukan pembaharuan data.");
+                                    }
                                  }}
                               />
                               <input
@@ -64,18 +69,22 @@ const Lampiran = () => {
                                  className="jsgrid-button jsgrid-delete-button"
                                  onClick={(e) => {
                                     e.preventDefault();
-                                    const send = confirm(`/notulen/lampiran/${row.id}`);
-                                    send.then((res) => {
-                                       if (typeof res !== "undefined") {
-                                          const { data } = res;
-                                          if (data.status) {
-                                             msgSuccess(data.message);
-                                             dispatch(setModule({ ...module, lampiran: data.content }));
-                                          } else {
-                                             msgError(data.message);
+                                    if (user.preferred_username === row.user_modified) {
+                                       const send = confirm(`/notulen/lampiran/${row.id}`);
+                                       send.then((res) => {
+                                          if (typeof res !== "undefined") {
+                                             const { data } = res;
+                                             if (data.status) {
+                                                msgSuccess(data.message);
+                                                dispatch(setModule({ ...module, lampiran: data.content }));
+                                             } else {
+                                                msgError(data.message);
+                                             }
                                           }
-                                       }
-                                    });
+                                       });
+                                    } else {
+                                       msgError("Anda tidak memiliki akses untuk melakukan penghapusan data.");
+                                    }
                                  }}
                               />
                            </span>

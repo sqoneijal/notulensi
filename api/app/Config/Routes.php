@@ -5,7 +5,9 @@ use CodeIgniter\Router\RouteCollection;
 $routes->group('backend', ['filter' => ['cors:api', 'keycloak-auth'], 'namespace' => 'App\Controllers\Backend'], static function (RouteCollection $routes): void {
    $routes->options('(:any)', 'App\Controllers\CorsHandler::options');
 
-   $routes->resource('dashboard');
+   $routes->post('getappuser', 'Dashboard::getAppUser');
+
+   $routes->resource('dashboard', ['only' => 'index']);
 
    $routes->group('notulen', static function (RouteCollection $routes): void {
       // lampiran

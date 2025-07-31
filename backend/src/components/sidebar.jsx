@@ -3,18 +3,29 @@ import { setActionButton, setModule } from "@/redux";
 import iconly_sprite from "@assets/images/iconly-sprite.svg";
 import { Each } from "@helpers/each";
 import keycloakInstance from "@helpers/keycloak";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useLocation } from "react-router";
 import ResizeObserver from "resize-observer-polyfill";
 import SimpleBar from "simplebar";
 
 const Sidebar = () => {
-   const { module } = useSelector((e) => e.redux);
+   const { module, init } = useSelector((e) => e.redux);
    const simplebarRef = useRef(null);
    const pinRefs = useRef([]);
    const dispatch = useDispatch();
    const location = useLocation();
+   const { is_admin } = init;
+
+   const [{ navigation }, setState] = useState({
+      navigation: [],
+   });
+
+   useEffect(() => {
+      setState((prev) => ({ ...prev, navigation: nav.filter((e) => e.role.includes(is_admin ? "is_admin" : "default")) }));
+      return () => {};
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+   }, [nav, is_admin]);
 
    // Helper function to handle sidebar link click
    const handleSidebarLinkClick = (item, sidebarListItems) => {
@@ -69,56 +80,58 @@ const Sidebar = () => {
    };
 
    useEffect(() => {
-      if (simplebarRef?.current) {
-         new SimpleBar(simplebarRef?.current);
-         window.ResizeObserver = ResizeObserver;
+      if (navigation.length > 0) {
+         if (simplebarRef?.current) {
+            new SimpleBar(simplebarRef?.current);
+            window.ResizeObserver = ResizeObserver;
 
-         const sidebarListItems = document.querySelectorAll(".sidebar-link");
-         // Add onclick event listener to each sidebar-list item
-         sidebarListItems.forEach((item) => {
-            item.addEventListener("click", () => handleSidebarLinkClick(item, sidebarListItems));
-         });
-      }
+            const sidebarListItems = document.querySelectorAll(".sidebar-link");
+            // Add onclick event listener to each sidebar-list item
+            sidebarListItems.forEach((item) => {
+               item.addEventListener("click", () => handleSidebarLinkClick(item, sidebarListItems));
+            });
+         }
 
-      if (pinRefs?.current) {
-         pinRefs.current.forEach((item) => {
-            const linkName = item.parentNode.querySelector("h6")?.innerHTML;
-            const localStoragePins = JSON.parse(localStorage.getItem("pins") || "[]");
+         if (pinRefs?.current) {
+            pinRefs.current.forEach((item) => {
+               const linkName = item.parentNode.querySelector("h6")?.innerHTML;
+               const localStoragePins = JSON.parse(localStorage.getItem("pins") || "[]");
 
-            if (Array.isArray(localStoragePins) && localStoragePins.includes(linkName)) {
-               item.parentNode.classList.add("pined");
-            }
-
-            item.addEventListener("click", () => {
-               let pins = JSON.parse(localStorage.getItem("pins") || "[]");
-
-               // Pastikan array
-               if (!Array.isArray(pins)) pins = [];
-
-               const isPinned = item.parentNode.classList.toggle("pined");
-
-               if (isPinned) {
-                  if (!pins.includes(linkName)) pins.push(linkName);
-               } else {
-                  pins = pins.filter((name) => name !== linkName);
+               if (Array.isArray(localStoragePins) && localStoragePins.includes(linkName)) {
+                  item.parentNode.classList.add("pined");
                }
 
-               localStorage.setItem("pins", JSON.stringify(pins));
+               item.addEventListener("click", () => {
+                  let pins = JSON.parse(localStorage.getItem("pins") || "[]");
 
-               togglePinnedName();
+                  // Pastikan array
+                  if (!Array.isArray(pins)) pins = [];
 
-               const topPos = item.offsetTop;
-               const sidebar = document.querySelector(".main-sidebar");
+                  const isPinned = item.parentNode.classList.toggle("pined");
 
-               scrollTo(sidebar, item.parentElement.parentElement.classList.contains("pined") ? topPos - 30 : item.parentNode.offsetTop - 30, 600);
+                  if (isPinned) {
+                     if (!pins.includes(linkName)) pins.push(linkName);
+                  } else {
+                     pins = pins.filter((name) => name !== linkName);
+                  }
+
+                  localStorage.setItem("pins", JSON.stringify(pins));
+
+                  togglePinnedName();
+
+                  const topPos = item.offsetTop;
+                  const sidebar = document.querySelector(".main-sidebar");
+
+                  scrollTo(sidebar, item.parentElement.parentElement.classList.contains("pined") ? topPos - 30 : item.parentNode.offsetTop - 30, 600);
+               });
             });
-         });
 
-         togglePinnedName();
+            togglePinnedName();
+         }
       }
 
       return () => {};
-   }, [simplebarRef, pinRefs]);
+   }, [simplebarRef, pinRefs, navigation]);
 
    useEffect(() => {
       // RESPONSIVE SIDEBAR 1200<
@@ -171,15 +184,17 @@ const Sidebar = () => {
       }
    };
 
-   const renderChild = (childElement) => {
+   const renderChild = (childElement, pathname, parent_pathname) => {
       if (typeof childElement !== "undefined") {
          return (
-            <ul className="sidebar-submenu">
+            <ul className="sidebar-submenu" style={{ display: pathname.split("/").includes(parent_pathname.replace(/^#/, "")) ? "block" : "none" }}>
                <Each
                   of={childElement}
                   render={(row) => (
-                     <li key={row.path}>
-                        <Link to={row.path}>{row.name}</Link>
+                     <li key={row.path} className={pathname === row.path ? "active" : ""}>
+                        <Link className={pathname === row.path ? "active" : ""} to={row.path}>
+                           {row.name}
+                        </Link>
                      </li>
                   )}
                />
@@ -188,18 +203,21 @@ const Sidebar = () => {
       }
    };
 
-   const renderParent = (row, index) => {
+   const renderParent = (row, pathname, index) => {
+      const findParent = pathname.split("/").includes(row.path.replace(/^#/, ""));
+      const activeParent = row.path === pathname || findParent ? "active" : "";
+
       return (
          <li className="sidebar-list" key={row.path}>
             <i className="fa-solid fa-thumbtack" ref={(el) => (pinRefs.current[index] = el)} />
-            <Link className="sidebar-link" to={row.path} onClick={() => handleOnClickNav(row)}>
+            <Link className={`sidebar-link ${activeParent}`} to={row.path} onClick={() => handleOnClickNav(row)}>
                <svg className="stroke-icon">
                   <use href={`${iconly_sprite}#${row.icon}`} />
                </svg>
                <h6>{row.name}</h6>
                {setArrowIcon(row.child)}
             </Link>
-            {renderChild(row.child)}
+            {renderChild(row.child, pathname, row.path)}
          </li>
       );
    };
@@ -221,7 +239,7 @@ const Sidebar = () => {
                      <h5 className="lan-1 f-w-700 sidebar-title">General</h5>
                   </div>
                </li>
-               <Each of={nav} render={(row, index) => renderParent(row, index)} />
+               <Each of={navigation} render={(row, index) => renderParent(row, location.pathname, index)} />
             </ul>
          </div>
          <div className="right-arrow" id="right-arrow">

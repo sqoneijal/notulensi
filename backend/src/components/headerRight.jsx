@@ -1,5 +1,6 @@
 import sprite from "@assets/images/iconly-sprite.svg";
 import profile from "@assets/images/profile.png";
+import { handleLogout } from "@helpers/auth";
 import axios from "axios";
 import { useEffect, useRef, useState } from "react";
 
@@ -113,7 +114,7 @@ const HeaderRight = () => {
                         <svg className="svg-color">
                            <use href={`${sprite}#Login`} />
                         </svg>
-                        <a className="ms-2" href="login.html">
+                        <a className="ms-2" href="#" onClick={handleLogout}>
                            Log Out
                         </a>
                      </li>

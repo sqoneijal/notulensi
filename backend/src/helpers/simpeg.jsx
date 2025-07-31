@@ -38,6 +38,15 @@ const cariPegawai = async (str, token) => {
                   emailUinar
                   noHp
                }
+               unitKerjaSaatIni {
+                  bagian {
+                     nama
+                  }
+                  posisi {
+                     kategori
+                     nama
+                  }
+               }
             }
          }
       }`;

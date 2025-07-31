@@ -1,6 +1,7 @@
 import { setInit } from "@/redux";
 import { handleLogout, initKeycloak } from "@helpers/auth";
 import Pageloader from "@helpers/pageloader";
+import { post } from "@helpers/request";
 import { cariPegawai } from "@helpers/simpeg";
 import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -30,6 +31,14 @@ function App() {
       return () => {};
    }, [simplebarRef]);
 
+   // Move handleGetAppUser outside of useEffect to reduce nesting
+   function handleGetAppUser(user, pemimpin, token) {
+      post("/getappuser", { username: user.preferred_username, simpeg: JSON.stringify(pemimpin) }).then(({ data }) => {
+         dispatch(setInit({ user, pemimpin, userApp: data, is_admin: data.is_admin === "t", token: { Authorization: `Bearer ${token}` } }));
+         setState({ isLoadingInitUser: false });
+      });
+   }
+
    useEffect(() => {
       initKeycloak().then((res) => {
          if (!res) return;
@@ -37,19 +46,18 @@ function App() {
          const { keycloak, user } = res;
          if (Object.keys(user).length > 0) {
             cariPegawai(user.preferred_username, keycloak.token).then((res) => {
-               if (res.length > 0) {
-                  const pemimpin = res[0];
-                  dispatch(setInit({ user, pemimpin, token: { Authorization: `Bearer ${keycloak.token}` } }));
-                  setState({ isLoadingInitUser: false });
+               if (res.length <= 0) {
                   return;
                }
 
-               return handleLogout();
+               const pemimpin = res[0];
+               handleGetAppUser(user, pemimpin, keycloak.token);
             });
          } else {
             return handleLogout();
          }
       });
+      // eslint-disable-next-line react-hooks/exhaustive-deps
    }, [dispatch]);
 
    return isLoadingInitUser ? (

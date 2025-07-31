@@ -5,6 +5,7 @@ import { decode } from "html-entities";
 import moment from "moment";
 import { Table } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
+import { v4 as uuidv4 } from "uuid";
 
 const ButirTugas = () => {
    const { module } = useSelector((e) => e.redux);
@@ -53,9 +54,10 @@ const ButirTugas = () => {
                render={(row, index) => {
                   const getIsiTugas = getTugas(module.butir_tugas)?.[row.participants_id];
                   const tugas = typeof getIsiTugas === "undefined" ? {} : getIsiTugas;
+                  const uuid = uuidv4();
 
                   return (
-                     <tr key={row.nip}>
+                     <tr key={`${row.nip}-${uuid}`}>
                         <td className="text-center">{index + 1}</td>
                         <td>
                            <a

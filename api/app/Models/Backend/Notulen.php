@@ -47,7 +47,7 @@ class Notulen extends Common
    public function createDataLampiran(array $post): array
    {
       try {
-         $data = $this->cleanDataSubmit(['note_id', 'file_name', 'file_path', 'file_type'], $post);
+         $data = $this->cleanDataSubmit(['note_id', 'file_name', 'file_path', 'file_type', 'user_modified'], $post);
          $data['create_at'] = new RawSql('now()');
 
          $table = $this->db->table('tb_attachments');
@@ -235,7 +235,8 @@ class Notulen extends Common
          json_agg(json_build_object(
             \'id\', id,
             \'file_name\', file_name,
-            \'file_path\', file_path
+            \'file_path\', file_path,
+            \'user_modified\', user_modified
          )) as lampiran');
       $table->groupBy('note_id');
 
@@ -349,7 +350,7 @@ class Notulen extends Common
    public function createData(array $post): array
    {
       try {
-         $data = $this->cleanDataSubmit(['title', 'agenda', 'banner_image', 'lokasi', 'embed_youtube'], $post);
+         $data = $this->cleanDataSubmit(['title', 'agenda', 'banner_image', 'lokasi', 'embed_youtube', 'user_modified'], $post);
 
          $cleanedInput = preg_replace('/\s*\(.*\)$/', '', $post['meeting_date']);
 
@@ -524,6 +525,12 @@ class Notulen extends Common
 
    public function getData(array $post): array
    {
+      $note_id = @$post['note_id'];
+      $where_note_id = [];
+      if ($note_id) {
+         $where_note_id = explode(',', $note_id);
+      }
+
       $table = $this->db->table('tb_notes t');
       $table->select('t.*, t2.full_name as pemimpin, t2.username as pemimpin_username, t3.full_name as moderator, t3.username as moderator_username, coalesce(t4.kategori, \'[]\') as kategori, coalesce(t5.peserta, \'[]\') as peserta');
       $table->join('tb_users t2', 't2.id = t.pemimpin_id', 'left');
@@ -531,6 +538,9 @@ class Notulen extends Common
       $table->join('(' . new RawSql($this->prepareSubQueryKategori()) . ') t4', 't4.note_id = t.id', 'left');
       $table->join('(' . new RawSql($this->prepareSubQueryPeserta(true)) . ') t5', 't5.note_id = t.id', 'left');
       $this->searchData($table, $post, ['t.title', 't.agenda']);
+      if (!empty($where_note_id) && $post['is_admin'] !== 'true') {
+         $table->whereIn('t.id', $where_note_id);
+      }
       $table->orderBy('t.id', 'desc');
       $table->limit((int) $post['limit'], (int) $post['offset']);
 
@@ -554,7 +564,7 @@ class Notulen extends Common
 
       return [
          'results' => $response,
-         'total' => $this->countTotalData()
+         'total' => $this->countTotalData(),
       ];
    }
 

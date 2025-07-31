@@ -1,6 +1,8 @@
 import { setActionButton, setModule } from "@/redux";
+import { isKategori1 } from "@helpers";
 import { confirm } from "@helpers/confirm_delete";
 import Grid from "@helpers/grid_table";
+import { msgError } from "@helpers/message";
 import { h } from "gridjs";
 import moment from "moment";
 import { useEffect, useRef } from "react";
@@ -9,22 +11,31 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router";
 
 const Index = () => {
-   const { module } = useSelector((e) => e.redux);
+   const { module, init } = useSelector((e) => e.redux);
+   const { pemimpin, is_admin, userApp, user } = init;
    const dispatch = useDispatch();
    const gridRef = useRef(null);
    const navigate = useNavigate();
 
+   const result_note_id = [...userApp.note_id_pemimpin, ...userApp.note_id_petugas];
+   const note_id = result_note_id.length > 0 ? `note_id=${result_note_id.join(",")}` : "";
+
    useEffect(() => {
-      dispatch(
-         setActionButton({
-            type: "add",
-            path: "/notulen/forms",
-            label: "Tambah Data",
-            className: "btn-primary",
-         })
-      );
+      if (isKategori1(pemimpin.unitKerjaSaatIni, is_admin)) {
+         dispatch(
+            setActionButton({
+               type: "add",
+               path: "/notulen/forms",
+               label: "Tambah Data",
+               className: "btn-primary",
+            })
+         );
+      } else {
+         dispatch(setActionButton({}));
+      }
+
       return () => {};
-   }, [dispatch]);
+   }, [dispatch, pemimpin, is_admin]);
 
    return (
       <Row>
@@ -69,8 +80,11 @@ const Index = () => {
                               type: "button",
                               title: "Edit",
                               onClick: () => {
-                                 dispatch(setModule({ ...module, detailUpdate: row }));
-                                 return navigate(`/notulen/forms`);
+                                 if (user.preferred_username === row.user_modified) {
+                                    dispatch(setModule({ ...module, detailUpdate: row }));
+                                    return navigate(`/notulen/forms`);
+                                 }
+                                 msgError("Anda tidak memiliki akses untuk melakukan pembaharuan data.");
                               },
                            }),
                            h("input", {
@@ -78,19 +92,23 @@ const Index = () => {
                               type: "button",
                               title: "Delete",
                               onCLick: () => {
-                                 const send = confirm(`/notulen/${row.id}`);
-                                 send.then((res) => {
-                                    if (typeof res !== "undefined") {
-                                       const { data } = res;
-                                       data.status && gridRef.current.updateConfig({}).forceRender();
-                                    }
-                                 });
+                                 if (user.preferred_username === row.user_modified) {
+                                    const send = confirm(`/notulen/${row.id}`);
+                                    send.then((res) => {
+                                       if (typeof res !== "undefined") {
+                                          const { data } = res;
+                                          data.status && gridRef.current.updateConfig({}).forceRender();
+                                       }
+                                    });
+                                 } else {
+                                    msgError("Anda tidak memiliki akses untuk melakukan penghapusan data.");
+                                 }
                               },
                            })
                         ),
                   },
                ]}
-               url="/notulen"
+               url={`/notulen?is_admin=${is_admin}&${note_id}`}
                gridRef={gridRef}
             />
          </Col>

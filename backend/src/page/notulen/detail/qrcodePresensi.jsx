@@ -7,7 +7,6 @@ import { useReactToPrint } from "react-to-print";
 const QrcodePresensi = () => {
    const qrRef = useRef();
    const { module } = useSelector((e) => e.redux);
-   console.log(module);
 
    const handlePrint = useReactToPrint({
       contentRef: qrRef,
