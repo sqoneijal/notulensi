@@ -22,10 +22,10 @@ $routes->group('backend', ['filter' => ['cors:api', 'keycloak-auth'], 'namespace
       $routes->post('submit-butir-tugas', 'Notulen::submitButirTugas');
    });
 
-   $routes->resource('notulen');
+   $routes->resource('notulen', ['only' => 'updateLampiran,createLampiran,submitButirTugas,updateHasilKeputusan,updateHasilDiskusi,updateStatusPresensi,uploadBanner,show,deleteLampiran,index,new,update,create,delete']);
 
    $routes->group('referensi', ['namespace' => 'App\Controllers\Backend\Referensi'], static function (RouteCollection $routes): void {
-      $routes->resource('kategori');
+      $routes->resource('kategori', ['only' => 'index,delete,update,create']);
    });
 });
 

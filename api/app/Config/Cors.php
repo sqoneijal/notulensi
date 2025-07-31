@@ -108,7 +108,7 @@ class Cors extends BaseConfig
    ];
 
    public array $api = [
-      'allowedOrigins'         => ['http://localhost:5173', 'https://dash.memo-mortal.ar-raniry.ac.id'],
+      'allowedOrigins'         => [],
       'allowedOriginsPatterns' => [],
       'supportsCredentials'    => true,
       'allowedHeaders'         => ['Authorization', 'Content-Type'],

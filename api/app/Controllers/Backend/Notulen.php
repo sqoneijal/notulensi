@@ -9,11 +9,6 @@ use App\Models\Backend\Notulen as Model;
 class Notulen extends BaseController
 {
 
-   public function options()
-   {
-      return respondCors($this->response)->setStatusCode(200);
-   }
-
    public function updateLampiran(int $id): object
    {
       $submit = [];

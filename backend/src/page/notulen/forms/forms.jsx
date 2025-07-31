@@ -11,7 +11,7 @@ import { useNavigate } from "react-router";
 
 const Forms = () => {
    const { init, module } = useSelector((e) => e.redux);
-   const { pemimpin } = init;
+   const { pemimpin, token } = init;
    const { detailUpdate } = module;
    const navigate = useNavigate();
 
@@ -154,7 +154,7 @@ const Forms = () => {
                      col={{ md: 6 }}
                      isLoading={isLoadingSearch}
                      onSearch={(query) =>
-                        cariPegawai(query).then((res) => {
+                        cariPegawai(query, token.Authorization.replace(/^Bearer\s+/i, "")).then((res) => {
                            const daftarPegawai = [];
                            res.forEach((row) => {
                               daftarPegawai.push({ value: row.id, label: `${row.nama} | ${row.id}`, ...row });
@@ -184,7 +184,7 @@ const Forms = () => {
                      isLoading={isLoadingSearch}
                      multiple={true}
                      onSearch={(query) =>
-                        cariPegawai(query).then((res) => {
+                        cariPegawai(query, token.Authorization.replace(/^Bearer\s+/i, "")).then((res) => {
                            const daftarPesertaRapat = [];
                            res.forEach((row) => {
                               daftarPesertaRapat.push({ value: row.id, label: `${row.nama} | ${row.id}`, ...row });

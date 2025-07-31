@@ -9,11 +9,6 @@ use App\Models\Backend\Referensi\Kategori as Model;
 class Kategori extends BaseController
 {
 
-   public function options()
-   {
-      return respondCors($this->response)->setStatusCode(200);
-   }
-
    public function index(): object
    {
       $model = new Model();
