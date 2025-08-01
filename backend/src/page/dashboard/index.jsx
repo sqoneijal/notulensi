@@ -2,6 +2,7 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import FullCalendar from "@fullcalendar/react";
 import PageLoader from "@helpers/pageloader";
 import { get } from "@helpers/request";
+import moment from "moment";
 import { useEffect, useState } from "react";
 import { Card, Col, Row } from "react-bootstrap";
 import { useNavigate } from "react-router";
@@ -9,13 +10,14 @@ import { useNavigate } from "react-router";
 const Index = () => {
    const navigate = useNavigate();
 
+   const [prevMonth, setPrevMonth] = useState(null);
    const [{ isLoading, events }, setState] = useState({
       isLoading: true,
       events: [],
    });
 
-   const getData = () => {
-      const fetch = get("/dashboard");
+   const getData = (meeting_date) => {
+      const fetch = get(`/dashboard?meeting_date=${meeting_date}`);
       fetch.then(({ data }) => {
          setState((prev) => ({ ...prev, events: data }));
       });
@@ -23,9 +25,29 @@ const Index = () => {
    };
 
    useEffect(() => {
-      getData();
+      if (prevMonth !== null) getData(`${prevMonth.year}-${String(prevMonth.month).padStart(2, "0")}`);
+      return () => {};
+   }, [prevMonth]);
+
+   useEffect(() => {
+      getData(moment().format("YYYY-MM"));
       return () => {};
    }, []);
+
+   const handleDatesSet = (arg) => {
+      const date = arg.view.currentStart;
+      const newMonth = date.getMonth();
+      const newYear = date.getFullYear();
+
+      if (prevMonth !== null) {
+         if (newYear > prevMonth.year || (newYear === prevMonth.year && newMonth > prevMonth.month)) {
+            console.log("Pindah ke bulan selanjutnya");
+         } else if (newYear < prevMonth.year || (newYear === prevMonth.year && newMonth < prevMonth.month)) {
+            console.log("Pindah ke bulan sebelumnya");
+         }
+      }
+      setPrevMonth({ month: newMonth + 1, year: newYear });
+   };
 
    return isLoading ? (
       <PageLoader />
@@ -37,8 +59,9 @@ const Index = () => {
                   <FullCalendar
                      plugins={[dayGridPlugin]}
                      initialView="dayGridMonth"
-                     weekends={false}
+                     weekends={true}
                      events={events}
+                     datesSet={handleDatesSet}
                      eventTimeFormat={{ hour: "numeric", minute: "2-digit", meridiem: "short" }}
                      eventClick={(info) => {
                         navigate(`/notulen/detail/${info.el.fcSeg.eventRange.def.publicId}`);

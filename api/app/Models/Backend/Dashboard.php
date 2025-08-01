@@ -104,11 +104,11 @@ class Dashboard extends Common
       return $table->countAllResults() > 0 ? true : false;
    }
 
-   public function getData(): array
+   public function getData(string $meeting_date): array
    {
       $table = $this->db->table('tb_notes tn');
       $table->select('tn.id, tn.title, to_char(tn.meeting_date, \'YYYY-MM-DD\') as date, tn.meeting_date as start, tn.agenda as keterangan');
-      $table->where('to_char(tn.meeting_date, \'YYYY-MM\')', date('Y-m'));
+      $table->where('to_char(tn.meeting_date, \'YYYY-MM\')', $meeting_date);
 
       $get = $table->get();
       $result = $get->getResultArray();

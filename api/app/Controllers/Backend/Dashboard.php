@@ -11,7 +11,7 @@ class Dashboard extends BaseController
    public function index(): object
    {
       $model = new Model();
-      $content = $model->getData();
+      $content = $model->getData($this->request->getGet('meeting_date'));
       return $this->respond($content);
    }
 
