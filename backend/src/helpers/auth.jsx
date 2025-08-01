@@ -23,7 +23,8 @@ export const initKeycloak = async () => {
 export const handleLogout = () => {
    if (keycloak?.logout) {
       keycloak.logout({
-         redirectUri: window.location.origin,
+         // redirectUri: window.location.origin,
+         redirectUri: "https://memo-mortal.ar-raniry.ac.id",
       });
    } else {
       console.warn("Keycloak belum diinisialisasi.");

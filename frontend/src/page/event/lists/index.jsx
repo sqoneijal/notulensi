@@ -30,6 +30,7 @@ const Index = () => {
    const props = { content, getData, setState, bottomOfPage, currentPage, totalData };
 
    useEffect(() => {
+      document.title = "Agenda";
       getData();
       return () => {};
    }, []);

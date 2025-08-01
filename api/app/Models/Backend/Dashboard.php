@@ -14,19 +14,39 @@ class Dashboard extends Common
 
       if (!$check) {
          $this->insertUsers($post['simpeg']);
+      } else {
+         $this->updateUsers($post['simpeg']);
       }
 
       return $this->getRowAppUser($post['username']);
    }
 
+   private function updateUsers(string $data): void
+   {
+      $post = json_decode($data, true);
+      $unitKerjaSaatIni = $post['unitKerjaSaatIni'];
+      $level = (@$unitKerjaSaatIni[0]['posisi']['kategori'] === 1 ? 'bos' : 'default');
+
+      $table = $this->db->table('tb_users');
+      $table->where('username', $post['id']);
+      $table->update([
+         'email' => @$post['kontak']['emailPribadi'] ?? null,
+         'full_name' => $post['nama'],
+         'level' => $level
+      ]);
+   }
+
    private function insertUsers(string $data): void
    {
       $post = json_decode($data, true);
+      $unitKerjaSaatIni = $post['unitKerjaSaatIni'];
+      $level = (@$unitKerjaSaatIni[0]['posisi']['kategori'] === 1 ? 'bos' : 'default');
 
       $this->db->table('tb_users')->insert([
          'username' => $post['id'],
          'email' => @$post['kontak']['emailPribadi'] ?? null,
-         'full_name' => $post['nama']
+         'full_name' => $post['nama'],
+         'level' => $level
       ]);
    }
 

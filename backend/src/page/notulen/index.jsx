@@ -1,5 +1,4 @@
 import { setActionButton, setModule } from "@/redux";
-import { isKategori1 } from "@helpers";
 import { confirm } from "@helpers/confirm_delete";
 import Grid from "@helpers/grid_table";
 import { msgError } from "@helpers/message";
@@ -12,7 +11,7 @@ import { useNavigate } from "react-router";
 
 const Index = () => {
    const { module, init } = useSelector((e) => e.redux);
-   const { pemimpin, is_admin, userApp, user } = init;
+   const { is_admin, userApp, user } = init;
    const dispatch = useDispatch();
    const gridRef = useRef(null);
    const navigate = useNavigate();
@@ -21,7 +20,7 @@ const Index = () => {
    const note_id = result_note_id.length > 0 ? `note_id=${result_note_id.join(",")}` : "";
 
    useEffect(() => {
-      if (isKategori1(pemimpin.unitKerjaSaatIni, is_admin)) {
+      if (is_admin || userApp.level === "bos") {
          dispatch(
             setActionButton({
                type: "add",
@@ -35,7 +34,7 @@ const Index = () => {
       }
 
       return () => {};
-   }, [dispatch, pemimpin, is_admin]);
+   }, [dispatch, is_admin, userApp]);
 
    return (
       <Row>

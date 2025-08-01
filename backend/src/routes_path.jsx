@@ -42,7 +42,7 @@ const routes = [
       name: "Notulen",
       element: NotulenForms,
       breadcrumbs: ["Notulen", "Forms"],
-      allowedRoles: ["is_admin"],
+      allowedRoles: ["is_admin", "bos"],
    },
    {
       path: "/notulen/detail/:id",

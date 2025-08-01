@@ -108,7 +108,7 @@ class Cors extends BaseConfig
    ];
 
    public array $api = [
-      'allowedOrigins'         => [],
+      'allowedOrigins'         => ['http://localhost:5173'],
       'allowedOriginsPatterns' => [],
       'supportsCredentials'    => true,
       'allowedHeaders'         => ['Authorization', 'Content-Type'],

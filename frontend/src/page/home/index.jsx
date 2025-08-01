@@ -29,6 +29,7 @@ const Index = () => {
    };
 
    useEffect(() => {
+      document.title = "Memo Mortal";
       getData();
       return () => {};
    }, []);
