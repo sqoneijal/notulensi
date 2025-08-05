@@ -20,9 +20,10 @@ $routes->group('backend', ['filter' => ['cors:api', 'keycloak-auth'], 'namespace
       $routes->post('update-hasil-diskusi', 'Notulen::updateHasilDiskusi');
       $routes->post('update-hasil-keputusan', 'Notulen::updateHasilKeputusan');
       $routes->post('submit-butir-tugas', 'Notulen::submitButirTugas');
+      $routes->post('kirim-undangan', 'Notulen::kirimUndangan');
    });
 
-   $routes->resource('notulen', ['only' => 'updateLampiran,createLampiran,submitButirTugas,updateHasilKeputusan,updateHasilDiskusi,updateStatusPresensi,uploadBanner,show,deleteLampiran,index,new,update,create,delete']);
+   $routes->resource('notulen', ['only' => 'updateLampiran,createLampiran,submitButirTugas,updateHasilKeputusan,updateHasilDiskusi,updateStatusPresensi,uploadBanner,show,deleteLampiran,index,new,update,create,delete,kirimUndangan']);
 
    $routes->group('referensi', ['namespace' => 'App\Controllers\Backend\Referensi'], static function (RouteCollection $routes): void {
       $routes->resource('kategori', ['only' => 'index,delete,update,create']);

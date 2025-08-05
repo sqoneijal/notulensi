@@ -1,3 +1,4 @@
+import { setInit } from "@/redux";
 import { Date } from "@helpers/date";
 import { AsyncFormTypeahead, DropzoneUpload, FormText, FormTextArea, FormTypeaheadMultiple } from "@helpers/forms";
 import { msgError, msgSuccess } from "@helpers/message";
@@ -6,7 +7,7 @@ import { cariPegawai } from "@helpers/simpeg";
 import moment from "moment";
 import { useEffect, useState } from "react";
 import { Button, Card, Col, Form, Row } from "react-bootstrap";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router";
 
 const Forms = () => {
@@ -14,6 +15,7 @@ const Forms = () => {
    const { pemimpin, token } = init;
    const { detailUpdate } = module;
    const navigate = useNavigate();
+   const dispatch = useDispatch();
 
    const [{ errors, input, isSubmit, isLoadingSearch, dropdown, selected }, setState] = useState({
       errors: {},
@@ -84,6 +86,12 @@ const Forms = () => {
          setState((prev) => ({ ...prev, errors: { ...data.errors } }));
 
          if (data.status) {
+            dispatch(
+               setInit({
+                  ...init,
+                  userApp: { ...init.userApp, note_id_pemimpin: data.note_id.note_id_pemimpin, note_id_petugas: data.note_id.note_id_petugas },
+               })
+            );
             msgSuccess(data.message);
             navigate("/notulen");
          } else {

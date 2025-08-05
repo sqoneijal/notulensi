@@ -9,6 +9,13 @@ use App\Models\Backend\Notulen as Model;
 class Notulen extends BaseController
 {
 
+   public function kirimUndangan(): object
+   {
+      $model = new Model();
+      $content = $model->handleKirimUndangan($this->request->getPost());
+      return $this->respond($content);
+   }
+
    public function updateLampiran(int $id): object
    {
       $submit = [];

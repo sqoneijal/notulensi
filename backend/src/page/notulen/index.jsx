@@ -4,7 +4,7 @@ import Grid from "@helpers/grid_table";
 import { msgError } from "@helpers/message";
 import { h } from "gridjs";
 import moment from "moment";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Col, Row } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router";
@@ -16,8 +16,16 @@ const Index = () => {
    const gridRef = useRef(null);
    const navigate = useNavigate();
 
-   const result_note_id = [...userApp.note_id_pemimpin, ...userApp.note_id_petugas];
-   const note_id = result_note_id.length > 0 ? `note_id=${result_note_id.join(",")}` : "";
+   const [{ grid_server }, setState] = useState({
+      grid_server: "",
+   });
+
+   useEffect(() => {
+      const result_note_id = [...userApp.note_id_pemimpin, ...userApp.note_id_petugas];
+      const noteIdParam = result_note_id.length > 0 ? "note_id=" + result_note_id.join(",") : "";
+      setState({ grid_server: `/notulen?is_admin=${is_admin}&${noteIdParam}` });
+      return () => {};
+   }, [userApp, is_admin]);
 
    useEffect(() => {
       if (is_admin || userApp.level === "bos") {
@@ -39,77 +47,79 @@ const Index = () => {
    return (
       <Row>
          <Col sm={12}>
-            <Grid
-               columns={[
-                  {
-                     name: "Judul",
-                     data: (row) => {
-                        return h(
-                           "a",
-                           {
-                              class: "fw-bold",
-                              href: "#",
-                              onClick: (e) => {
-                                 e.preventDefault();
-                                 navigate(`/notulen/detail/${row.id}`);
+            {grid_server && (
+               <Grid
+                  columns={[
+                     {
+                        name: "Judul",
+                        data: (row) => {
+                           return h(
+                              "a",
+                              {
+                                 class: "fw-bold",
+                                 href: "#",
+                                 onClick: (e) => {
+                                    e.preventDefault();
+                                    navigate(`/notulen/detail/${row.id}`);
+                                 },
                               },
-                           },
-                           row.title
-                        );
+                              row.title
+                           );
+                        },
                      },
-                  },
-                  { name: "Agenda", data: (row) => row.agenda },
-                  { name: "Waktu", data: (row) => moment(row.meeting_date).format("DD-MM-YYYY hh:mm A") },
-                  { name: "Pemimpin", data: (row) => row.pemimpin },
-                  { name: "Petugas", data: (row) => row.moderator },
-                  {
-                     id: "aksi",
-                     sort: false,
-                     attributes: () => {
-                        return {
-                           class: "gridjs-td jsgrid-cell jsgrid-control-field jsgrid-align-center",
-                        };
+                     { name: "Agenda", data: (row) => row.agenda },
+                     { name: "Waktu", data: (row) => moment(row.meeting_date).format("DD-MM-YYYY hh:mm A") },
+                     { name: "Pemimpin", data: (row) => row.pemimpin },
+                     { name: "Petugas", data: (row) => row.moderator },
+                     {
+                        id: "aksi",
+                        sort: false,
+                        attributes: () => {
+                           return {
+                              class: "gridjs-td jsgrid-cell jsgrid-control-field jsgrid-align-center",
+                           };
+                        },
+                        data: (row) =>
+                           h(
+                              "span",
+                              {},
+                              h("input", {
+                                 className: "jsgrid-button jsgrid-edit-button",
+                                 type: "button",
+                                 title: "Edit",
+                                 onClick: () => {
+                                    if (user.preferred_username === row.user_modified) {
+                                       dispatch(setModule({ ...module, detailUpdate: row }));
+                                       return navigate(`/notulen/forms`);
+                                    }
+                                    msgError("Anda tidak memiliki akses untuk melakukan pembaharuan data.");
+                                 },
+                              }),
+                              h("input", {
+                                 className: "jsgrid-button jsgrid-delete-button",
+                                 type: "button",
+                                 title: "Delete",
+                                 onCLick: () => {
+                                    if (user.preferred_username === row.user_modified) {
+                                       const send = confirm(`/notulen/${row.id}`);
+                                       send.then((res) => {
+                                          if (typeof res !== "undefined") {
+                                             const { data } = res;
+                                             data.status && gridRef.current.updateConfig({}).forceRender();
+                                          }
+                                       });
+                                    } else {
+                                       msgError("Anda tidak memiliki akses untuk melakukan penghapusan data.");
+                                    }
+                                 },
+                              })
+                           ),
                      },
-                     data: (row) =>
-                        h(
-                           "span",
-                           {},
-                           h("input", {
-                              className: "jsgrid-button jsgrid-edit-button",
-                              type: "button",
-                              title: "Edit",
-                              onClick: () => {
-                                 if (user.preferred_username === row.user_modified) {
-                                    dispatch(setModule({ ...module, detailUpdate: row }));
-                                    return navigate(`/notulen/forms`);
-                                 }
-                                 msgError("Anda tidak memiliki akses untuk melakukan pembaharuan data.");
-                              },
-                           }),
-                           h("input", {
-                              className: "jsgrid-button jsgrid-delete-button",
-                              type: "button",
-                              title: "Delete",
-                              onCLick: () => {
-                                 if (user.preferred_username === row.user_modified) {
-                                    const send = confirm(`/notulen/${row.id}`);
-                                    send.then((res) => {
-                                       if (typeof res !== "undefined") {
-                                          const { data } = res;
-                                          data.status && gridRef.current.updateConfig({}).forceRender();
-                                       }
-                                    });
-                                 } else {
-                                    msgError("Anda tidak memiliki akses untuk melakukan penghapusan data.");
-                                 }
-                              },
-                           })
-                        ),
-                  },
-               ]}
-               url={`/notulen?is_admin=${is_admin}&${note_id}`}
-               gridRef={gridRef}
-            />
+                  ]}
+                  url={grid_server}
+                  gridRef={gridRef}
+               />
+            )}
          </Col>
       </Row>
    );

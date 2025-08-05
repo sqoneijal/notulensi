@@ -2,12 +2,21 @@ import { Each } from "@helpers/each";
 import { msgError, msgSuccess } from "@helpers/message";
 import { post, postValue } from "@helpers/request";
 import moment from "moment";
-import { Badge, Form, Table } from "react-bootstrap";
+import { useRef, useState } from "react";
+import { Badge, Button, Form, OverlayTrigger, Table, Tooltip } from "react-bootstrap";
 import { useSelector } from "react-redux";
+import { useParams } from "react-router";
 import { v4 as uuidv4 } from "uuid";
 
 const Peserta = () => {
    const { module } = useSelector((e) => e.redux);
+   const checkbox = useRef([]);
+   const { id } = useParams();
+
+   const [{ listEmailToSending, isLoadingSendingEmail }, setState] = useState({
+      listEmailToSending: [],
+      isLoadingSendingEmail: false,
+   });
 
    const arrayStatus = [
       { value: "hadir", label: "Hadir" },
@@ -48,10 +57,81 @@ const Peserta = () => {
       }
    };
 
+   const handleKirimUndangan = (e) => {
+      e.preventDefault();
+
+      setState((prev) => ({ ...prev, isLoadingSendingEmail: true }));
+
+      const peserta = [];
+      Object.keys(checkbox.current).forEach((nip) => {
+         if (checkbox.current[nip].checked) {
+            peserta.push(JSON.parse(checkbox.current[nip].dataset.json));
+         }
+      });
+
+      const fetch = post(`/notulen/kirim-undangan`, { note_id: id, peserta: JSON.stringify(peserta) });
+      fetch.then(({ data }) => {
+         if (data.status) {
+            msgSuccess(data.message);
+         } else {
+            msgError(data.message);
+         }
+      });
+      fetch.finally(() => setState((prev) => ({ ...prev, isLoadingSendingEmail: false })));
+   };
+
+   const handleSelectAll = (e) => {
+      const { checked } = e.target;
+      const allNips = Object.keys(checkbox.current);
+
+      if (checked) {
+         // Select all checkboxes and collect their values
+         allNips.forEach((nip) => {
+            if (checkbox.current[nip]) {
+               checkbox.current[nip].checked = true;
+            }
+         });
+         const selected = allNips.map((nip) => checkbox.current[nip]?.value).filter(Boolean);
+         setState((prev) => ({ ...prev, listEmailToSending: selected }));
+         return;
+      }
+
+      // Deselect all checkboxes
+      allNips.forEach((nip) => {
+         if (checkbox.current[nip]) {
+            checkbox.current[nip].checked = false;
+         }
+      });
+      setState((prev) => ({ ...prev, listEmailToSending: [] }));
+   };
+
+   const handleChecked = (e) => {
+      const { checked, value } = e.target;
+
+      setState((prev) => ({
+         ...prev,
+         listEmailToSending: checked
+            ? [...prev.listEmailToSending, value] // tambah jika dicentang
+            : prev.listEmailToSending.filter((item) => item !== value), // hapus jika tidak dicentang
+      }));
+   };
+
    return (
       <Table>
          <thead>
+            {listEmailToSending.length > 0 && (
+               <tr>
+                  <td colSpan={7}>
+                     <Button size="sm" onClick={handleKirimUndangan}>
+                        {isLoadingSendingEmail ? "Loading..." : "Kirim Undangan Rapat"}
+                     </Button>
+                  </td>
+               </tr>
+            )}
             <tr>
+               <th style={{ width: "1%" }}>
+                  <Form.Check inline={true} className="m-0 p-0" onChange={handleSelectAll} />
+               </th>
                <th className="text-center" style={{ width: "5%" }}>
                   No
                </th>
@@ -72,8 +152,27 @@ const Peserta = () => {
 
                   return (
                      <tr key={`${row.nip}-${uuid}`} style={{ verticalAlign: "middle" }}>
+                        <td className="text-center">
+                           {row.email && (
+                              <Form.Check
+                                 id={`${row.nip}-${uuid}`}
+                                 inline={true}
+                                 className="m-0 p-0"
+                                 ref={(el) => (checkbox.current[row.nip] = el)}
+                                 value={row.nip}
+                                 checked={listEmailToSending.includes(row.nip)}
+                                 onChange={handleChecked}
+                                 data-json={JSON.stringify(row)}
+                              />
+                           )}
+                        </td>
                         <td className="text-center">{index + 1}</td>
-                        <td>{row.nip}</td>
+                        <td>
+                           <OverlayTrigger overlay={<Tooltip>Kirim Undangan Rapat Kepada {row.nama}</Tooltip>}>
+                              <i className="iconly-Send icli svg-color" style={{ paddingRight: 10, cursor: "pointer" }} />
+                           </OverlayTrigger>
+                           {row.nip}
+                        </td>
                         <td>{row.nama}</td>
                         <td>{row.email}</td>
                         <td className="text-center">{renderPresensi(getStatusPresesnsi(module.presensi)?.[row.participants_id])}</td>

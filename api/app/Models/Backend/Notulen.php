@@ -8,6 +8,36 @@ use CodeIgniter\Database\RawSql;
 class Notulen extends Common
 {
 
+   public function handleKirimUndangan(array $post): array
+   {
+      $result = ['status' => false, 'message' => 'Undangan gagal terkirim, silahkan coba lagi.'];
+      try {
+         helper('mailer');
+
+         $peserta = json_decode($post['peserta'], true);
+         $note = $this->getDetail($post['note_id']);
+
+         if (!empty($peserta)) {
+            $daftar_penerima = [];
+            foreach ($peserta as $row) {
+               array_push($daftar_penerima, [
+                  'email' => $row['email'],
+                  'nama' => $row['nama']
+               ]);
+            }
+
+            $send_email = send_email($note['content']['title'], $daftar_penerima, $note['content']);
+
+            if ($send_email) {
+               $result = ['status' => true, 'message' => 'Undangan berhasil dikirim.'];
+            }
+         }
+      } catch (\Exception $e) {
+         $result = ['status' => false, 'message' => $e->getMessage()];
+      }
+      return $result;
+   }
+
    public function updateDataLampiran(int $id, array $post): array
    {
       try {
@@ -322,7 +352,7 @@ class Notulen extends Common
             }
          }
 
-         return ['status' => true, 'message' => 'Data berhasil disimpan.'];
+         return ['status' => true, 'message' => 'Data berhasil disimpan.', 'note_id' => $this->getNoteIDList($post['user_modified'])];
       } catch (\Exception $e) {
          return ['status' => false, 'message' => $e->getMessage()];
       }
@@ -384,10 +414,48 @@ class Notulen extends Common
             }
          }
 
-         return ['status' => true, 'message' => 'Data berhasil disimpan.'];
+         return ['status' => true, 'message' => 'Data berhasil disimpan.', 'note_id' => $this->getNoteIDList($post['user_modified'])];
       } catch (\Exception $e) {
          return ['status' => false, 'message' => $e->getMessage()];
       }
+   }
+
+   private function getNoteIDList(string $username): array
+   {
+      $table = $this->db->table('tb_users tu');
+      $table->select('coalesce(tn.note_id_petugas, \'[]\') as note_id_petugas, coalesce(tn2.note_id_pemimpin, \'[]\') as note_id_pemimpin');
+      $table->join('(' . new RawSql($this->prepareFunctionNotesPetugas()) . ') tn', 'tn.moderator_id = tu.id', 'left');
+      $table->join('(' . new RawSql($this->prepareFunctionNotesPemimpin()) . ') tn2', 'tn2.pemimpin_id = tu.id', 'left');
+      $table->where('tu.username', $username);
+
+      $get = $table->get();
+      $data = $get->getRowArray();
+      $get->freeResult();
+
+      $response = [];
+      if (isset($data)) {
+         $response['note_id_pemimpin'] = json_decode($data['note_id_pemimpin'], true);
+         $response['note_id_petugas'] = json_decode($data['note_id_petugas'], true);
+      }
+      return $response;
+   }
+
+   private function prepareFunctionNotesPemimpin(): string
+   {
+      $table = $this->db->table('tb_notes tn');
+      $table->select('tn.pemimpin_id, json_agg(tn.id) as note_id_pemimpin');
+      $table->groupBy('tn.pemimpin_id');
+
+      return $table->getCompiledSelect();
+   }
+
+   private function prepareFunctionNotesPetugas(): string
+   {
+      $table = $this->db->table('tb_notes tn');
+      $table->select('tn.moderator_id, json_agg(tn.id) as note_id_petugas');
+      $table->groupBy('tn.moderator_id');
+
+      return $table->getCompiledSelect();
    }
 
    private function generateUserPeserta(array $content, int $noteId): void

@@ -54,6 +54,7 @@ const cariPegawai = async (str, token) => {
    const variables = {
       filter: {
          searchString: str,
+         daftarStatusAktifId: 1,
       },
    };
 
