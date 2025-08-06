@@ -21,4 +21,11 @@ class Event extends BaseController
       $content = $model->getShowData($id);
       return $this->respond($content);
    }
+
+   public function presensi(int $note_id): object
+   {
+      $model = new Model();
+      $content = $model->handlePresensi($note_id, $this->request->getPost());
+      return $this->respond($content);
+   }
 }

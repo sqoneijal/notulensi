@@ -2,9 +2,10 @@
 
 use CodeIgniter\Router\RouteCollection;
 
-$routes->group('backend', ['filter' => ['cors:api', 'keycloak-auth'], 'namespace' => 'App\Controllers\Backend'], static function (RouteCollection $routes): void {
-   $routes->options('(:any)', 'App\Controllers\CorsHandler::options');
+$routes->options('backend/(:any)', 'CorsHandler::options');
+$routes->options('frontend/(:any)', 'CorsHandler::options');
 
+$routes->group('backend', ['filter' => ['cors:api', 'keycloak-auth'], 'namespace' => 'App\Controllers\Backend'], static function (RouteCollection $routes): void {
    $routes->post('getappuser', 'Dashboard::getAppUser');
 
    $routes->resource('dashboard', ['only' => 'index']);
@@ -31,10 +32,10 @@ $routes->group('backend', ['filter' => ['cors:api', 'keycloak-auth'], 'namespace
 });
 
 $routes->group('frontend', ['filter' => ['cors:api'], 'namespace' => 'App\Controllers\Frontend'], static function (RouteCollection $routes): void {
-   $routes->options('(:any)', 'App\Controllers\CorsHandler::options');
-
    $routes->resource('home', ['only' => 'index']);
    $routes->resource('event', ['only' => 'index']);
+
+   $routes->post('presensi/(:num)', 'Event::presensi/$1');
 
    $routes->group('detail', static function (RouteCollection $routes): void {
       $routes->resource('event', ['only' => 'show']);
