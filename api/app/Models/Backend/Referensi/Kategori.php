@@ -79,7 +79,7 @@ class Kategori extends Common
 
       return [
          'results' => $response,
-         'total' => $this->countTotalData()
+         'total' => $this->countTotalData(),
       ];
    }
 }

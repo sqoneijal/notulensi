@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 const Banner = React.lazy(() => import("./banner"));
 const NotulenTerbaru = React.lazy(() => import("./notulenTerbaru"));
 const JadwalRapat = React.lazy(() => import("./jadwalRapat"));
-const Gallery = React.lazy(() => import("./gallery"));
+// const Gallery = React.lazy(() => import("./gallery"));
 
 const Index = () => {
    const [state, setState] = useState({
@@ -41,7 +41,7 @@ const Index = () => {
          <Banner {...state} />
          <NotulenTerbaru {...state} />
          <JadwalRapat {...state} />
-         <Gallery {...state} />
+         {/* <Gallery {...state} /> */}
       </React.Suspense>
    );
 };

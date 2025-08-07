@@ -3,7 +3,7 @@ import { msgError, msgSuccess } from "@helpers/message";
 import { post, postValue } from "@helpers/request";
 import moment from "moment";
 import { useRef, useState } from "react";
-import { Badge, Button, Form, OverlayTrigger, Table, Tooltip } from "react-bootstrap";
+import { Badge, Button, Form, Table } from "react-bootstrap";
 import { useSelector } from "react-redux";
 import { useParams } from "react-router";
 import { v4 as uuidv4 } from "uuid";
@@ -167,12 +167,7 @@ const Peserta = () => {
                            )}
                         </td>
                         <td className="text-center">{index + 1}</td>
-                        <td>
-                           <OverlayTrigger overlay={<Tooltip>Kirim Undangan Rapat Kepada {row.nama}</Tooltip>}>
-                              <i className="iconly-Send icli svg-color" style={{ paddingRight: 10, cursor: "pointer" }} />
-                           </OverlayTrigger>
-                           {row.nip}
-                        </td>
+                        <td>{row.nip}</td>
                         <td>{row.nama}</td>
                         <td>{row.email}</td>
                         <td className="text-center">{renderPresensi(getStatusPresesnsi(module.presensi)?.[row.participants_id])}</td>

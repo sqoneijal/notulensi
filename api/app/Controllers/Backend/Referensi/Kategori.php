@@ -12,7 +12,7 @@ class Kategori extends BaseController
    public function index(): object
    {
       $model = new Model();
-      $content = $model->getData($this->request->getGet());
+      $content = $model->getData($this->request->getVar());
       return $this->respond($content);
    }
 

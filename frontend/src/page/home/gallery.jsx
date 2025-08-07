@@ -1,25 +1,23 @@
-import "@assets/css/lightcase.css";
+// import "@assets/css/lightcase.css";
 import { Each } from "@helpers/each";
-import $ from "jquery";
 import { useEffect } from "react";
+import SimpleLightbox from "simplelightbox";
 
 const Gallery = ({ gallery }) => {
    useEffect(() => {
-      window.jQuery = $;
-      window.$ = $;
+      // window.jQuery = $;
+      // window.$ = $;
 
-      // Load lightcase.js secara dinamis setelah jQuery siap
-      const script = document.createElement("script");
-      script.src = "/src/assets/js/lightcase.js"; // pastikan path benar sesuai folder project kamu
-      script.async = true;
-      script.onload = () => {
-         $("a[data-rel^=lightcase]").lightcase();
-      };
+      // const script = document.createElement("script");
+      // script.src = "/src/assets/js/lightcase.js";
+      // script.async = true;
+      // script.onload = () => {
+      //    $("a[data-rel^=lightcase]").lightcase();
+      // };
 
-      document.body.appendChild(script);
-      return () => {
-         document.body.removeChild(script);
-      };
+      // document.body.appendChild(script);
+      new SimpleLightbox("figure.image a");
+      return () => {};
    }, []);
 
    return (
@@ -44,7 +42,6 @@ const Gallery = ({ gallery }) => {
                   />
                </div>
             </div>
-
             <div className="outer-box">
                <div className="gallery two">
                   <Each
