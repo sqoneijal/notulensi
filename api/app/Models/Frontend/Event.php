@@ -30,6 +30,8 @@ class Event extends Common
                $result = ['status' => true, 'content' => $post, 'message' => 'Presensi berhasil dilakukan.'];
             }
             $result = ['status' => true, 'content' => $post, 'message' => 'Presensi berhasil dilakukan.'];
+         } else {
+            $result = ['status' => false, 'message' => 'Gagal melakukan presensi, mungkin anda bukan peserta rapat.'];
          }
       } catch (\Exception $e) {
          $result = ['status' => false, 'message' => $e->getMessage()];

@@ -31,7 +31,11 @@ const Presensi = () => {
 
       initKeycloak().then(({ keycloak, user }) => {
          if (Object.keys(keycloak).length > 0 && Object.keys(user).length > 0) {
-            const fetch = post(`/presensi/${id}`, user);
+            const fetch = post(`/presensi/${id}`, user, {
+               headers: {
+                  Authorization: `Bearer ${keycloak.token}`,
+               },
+            });
             fetch.then(({ data }) => {
                const { status } = data;
                if (status) {
