@@ -3,8 +3,11 @@ import profile from "@assets/images/profile.png";
 import { handleLogout } from "@helpers/auth";
 import axios from "axios";
 import { useEffect, useRef, useState } from "react";
+import { useSelector } from "react-redux";
 
 const HeaderRight = () => {
+   const { init } = useSelector((e) => e.redux);
+   const { userApp } = init;
    const dropdownRef = useRef(null);
 
    const [state, setState] = useState({
@@ -94,22 +97,14 @@ const HeaderRight = () => {
                      <img src={profile} alt="user" />
                   </div>
                   <div className="user-content">
-                     <h6>Safrizal</h6>
+                     <h6>{userApp.full_name}</h6>
                      <p className="mb-0">
-                        Admin <i className="fa-solid fa-chevron-down" />
+                        {userApp.username} <i className="fa-solid fa-chevron-down" />
                      </p>
                   </div>
                </div>
                <div className={`custom-menu overflow-hidden ${openProfileDropdown ? "show" : ""}`} ref={dropdownRef}>
                   <ul className="profile-body">
-                     <li className="d-flex">
-                        <svg className="svg-color">
-                           <use href={`${sprite}#Document`} />
-                        </svg>
-                        <a className="ms-2" href="to-do.html">
-                           Task
-                        </a>
-                     </li>
                      <li className="d-flex">
                         <svg className="svg-color">
                            <use href={`${sprite}#Login`} />

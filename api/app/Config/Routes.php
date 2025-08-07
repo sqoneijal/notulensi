@@ -2,8 +2,8 @@
 
 use CodeIgniter\Router\RouteCollection;
 
-$routes->options('backend/(:any)', 'CorsHandler::options');
-$routes->options('frontend/(:any)', 'CorsHandler::options');
+$routes->options('backend/(:any)', 'BaseController::options', ['filter' => 'cors:api']);
+$routes->options('frontend/(:any)', 'BaseController::options', ['filter' => 'cors:api']);
 
 $routes->group('backend', ['filter' => ['cors:api', 'keycloak-auth'], 'namespace' => 'App\Controllers\Backend'], static function (RouteCollection $routes): void {
    $routes->post('getappuser', 'Dashboard::getAppUser');

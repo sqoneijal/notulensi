@@ -27,4 +27,9 @@ abstract class BaseController extends Controller
     * @var list<string>
     */
    protected $helpers = ['cors', 'cdn'];
+
+   public function options()
+   {
+      return respondCors($this->response)->setStatusCode(200);
+   }
 }
