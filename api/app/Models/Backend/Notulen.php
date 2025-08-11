@@ -216,15 +216,36 @@ class Notulen extends Common
    public function getDropdown(): array
    {
       return [
-         'daftarKategori' => $this->getDaftarKategori()
+         'daftarKategori' => $this->getDaftarKategori(),
+         'daftarKeywords' => $this->getDaftarKeywords()
       ];
+   }
+
+   private function getDaftarKeywords(): array
+   {
+      $table = $this->db->table('tb_notes_keywords');
+      $table->select('keyword as label, id as value');
+      $table->orderBy('keyword');
+
+      $get = $table->get();
+      $result = $get->getResultArray();
+      $fieldNames = $get->getFieldNames();
+      $get->freeResult();
+
+      $response = [];
+      foreach ($result as $key => $val) {
+         foreach ($fieldNames as $field) {
+            $response[$key][$field] = $val[$field] ? trim($val[$field]) : (string) $val[$field];
+         }
+      }
+      return $response;
    }
 
    public function getDetail(int $id): array
    {
       try {
          $table = $this->db->table('tb_notes t');
-         $table->select('t.id as note_id, t.title, t.meeting_date, t.agenda, t.discussion_points, t.decisions, t2.full_name as pemimpin, t2.username as nip_pemimpin, t3.full_name as moderator, t3.username as nip_moderator, t.banner_image, coalesce(t4.kategori, \'[]\') as kategori, coalesce(t5.peserta, \'[]\') as peserta, coalesce(t6.presensi, \'[]\') as presensi, coalesce(taid.butir_tugas, \'[]\') as butir_tugas, coalesce(ta.lampiran, \'[]\') as lampiran, t.lokasi');
+         $table->select('t.id as note_id, t.title, t.meeting_date, t.agenda, t.discussion_points, t.decisions, t2.full_name as pemimpin, t2.username as nip_pemimpin, t3.full_name as moderator, t3.username as nip_moderator, t.banner_image, coalesce(t4.kategori, \'[]\') as kategori, coalesce(t5.peserta, \'[]\') as peserta, coalesce(t6.presensi, \'[]\') as presensi, coalesce(taid.butir_tugas, \'[]\') as butir_tugas, coalesce(ta.lampiran, \'[]\') as lampiran, t.lokasi, coalesce(tnk.keywords, \'[]\') as keywords');
          $table->join('tb_users t2', 't2.id = t.pemimpin_id', 'left');
          $table->join('tb_users t3', 't3.id = t.moderator_id', 'left');
          $table->join('(' . new RawSql($this->prepareSubQueryKategori()) . ') t4', 't4.note_id = t.id', 'left');
@@ -232,6 +253,7 @@ class Notulen extends Common
          $table->join('(' . new RawSql($this->prepareSubQueryPresensi()) . ') t6', 't6.note_id = t.id', 'left');
          $table->join('(' . new RawSql($this->prepareSubQueryButirTugas()) . ') taid', 'taid.note_id = t.id', 'left');
          $table->join('(' . new RawSql($this->prepareSubQueryLampiran()) . ') ta', 'ta.note_id = t.id', 'left');
+         $table->join('(' . new RawSql($this->prepareSubQueryKeywords()) . ') tnk', 'tnk.note_id = t.id', 'left');
          $table->where('t.id', $id);
 
          $get = $table->get();
@@ -239,7 +261,7 @@ class Notulen extends Common
          $fieldNames = $get->getFieldNames();
          $get->freeResult();
 
-         $field_decode_json = ['kategori', 'peserta', 'presensi', 'butir_tugas', 'lampiran'];
+         $field_decode_json = ['kategori', 'peserta', 'presensi', 'butir_tugas', 'lampiran', 'keywords'];
 
          $response = [];
          if (isset($data)) {
@@ -352,6 +374,13 @@ class Notulen extends Common
             }
          }
 
+         if (@$post['keywords']) {
+            $keywords = json_decode($post['keywords'], true);
+            if (!empty($keywords)) {
+               $this->syncNoteKeywords($keywords, $data['note_id']);
+            }
+         }
+
          return ['status' => true, 'message' => 'Data berhasil disimpan.', 'note_id' => $this->getNoteIDList($post['user_modified'])];
       } catch (\Exception $e) {
          return ['status' => false, 'message' => $e->getMessage()];
@@ -414,9 +443,36 @@ class Notulen extends Common
             }
          }
 
+         if (@$post['keywords']) {
+            $keywords = json_decode($post['keywords'], true);
+            if (!empty($keywords)) {
+               $this->syncNoteKeywords($keywords, $data['note_id']);
+            }
+         }
+
          return ['status' => true, 'message' => 'Data berhasil disimpan.', 'note_id' => $this->getNoteIDList($post['user_modified'])];
       } catch (\Exception $e) {
          return ['status' => false, 'message' => $e->getMessage()];
+      }
+   }
+
+   private function syncNoteKeywords(array $keywordsLists, int $note_id): void
+   {
+      $this->db->table('tb_notes_keywords')
+         ->where('note_id', $note_id)
+         ->delete();
+
+      $data = [];
+      foreach ($keywordsLists as $row) {
+         array_push($data, [
+            'note_id' => $note_id,
+            'keyword' => ucwords(strtolower($row['label'])),
+            'slug' => url_title($row['label'], '-', true),
+         ]);
+      }
+
+      if (!empty($data)) {
+         $this->db->table('tb_notes_keywords')->insertBatch($data);
       }
    }
 
@@ -600,11 +656,12 @@ class Notulen extends Common
       }
 
       $table = $this->db->table('tb_notes t');
-      $table->select('t.*, t2.full_name as pemimpin, t2.username as pemimpin_username, t3.full_name as moderator, t3.username as moderator_username, coalesce(t4.kategori, \'[]\') as kategori, coalesce(t5.peserta, \'[]\') as peserta');
+      $table->select('t.*, t2.full_name as pemimpin, t2.username as pemimpin_username, t3.full_name as moderator, t3.username as moderator_username, coalesce(t4.kategori, \'[]\') as kategori, coalesce(t5.peserta, \'[]\') as peserta, coalesce(tnk.keywords, \'[]\') as keywords');
       $table->join('tb_users t2', 't2.id = t.pemimpin_id', 'left');
       $table->join('tb_users t3', 't3.id = t.moderator_id', 'left');
       $table->join('(' . new RawSql($this->prepareSubQueryKategori()) . ') t4', 't4.note_id = t.id', 'left');
       $table->join('(' . new RawSql($this->prepareSubQueryPeserta(true)) . ') t5', 't5.note_id = t.id', 'left');
+      $table->join('(' . new RawSql($this->prepareSubQueryKeywords()) . ') tnk', 'tnk.note_id = t.id', 'left');
       $this->searchData($table, $post, ['t.title', 't.agenda']);
       if (@$post['is_admin'] !== 'true' && !empty($where_note_id)) {
          $table->whereIn('t.id', $where_note_id);
@@ -617,13 +674,13 @@ class Notulen extends Common
       $fieldNames = $get->getFieldNames();
       $get->freeResult();
 
+      $json_decode = ['kategori', 'peserta', 'keywords'];
+
       $response = [];
       foreach ($result as $key => $val) {
          foreach ($fieldNames as $field) {
-            if ($field === 'kategori') {
-               $response[$key][$field] = json_decode($val['kategori'], true);
-            } elseif ($field === 'peserta') {
-               $response[$key][$field] = json_decode($val['peserta'], true);
+            if (in_array($field, $json_decode)) {
+               $response[$key][$field] = json_decode($val[$field], true);
             } else {
                $response[$key][$field] = $val[$field] ? trim($val[$field]) : (string) $val[$field];
             }
@@ -634,6 +691,21 @@ class Notulen extends Common
          'results' => $response,
          'total' => $this->countTotalData($post),
       ];
+   }
+
+   private function prepareSubQueryKeywords(): string
+   {
+      $table = $this->db->table('tb_notes_keywords');
+      $table->select('note_id,
+		json_agg(json_build_object(
+			\'id\', id,
+			\'note_id\', note_id,
+			\'label\', keyword,
+			\'value\', slug
+		)) as keywords');
+      $table->groupBy('note_id');
+
+      return $table->getCompiledSelect();
    }
 
    private function countTotalData(array $post): int

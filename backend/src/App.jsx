@@ -34,7 +34,16 @@ function App() {
    // Move handleGetAppUser outside of useEffect to reduce nesting
    function handleGetAppUser(user, pemimpin, token) {
       post("/getappuser", { username: user.preferred_username, simpeg: JSON.stringify(pemimpin) }).then(({ data }) => {
-         dispatch(setInit({ user, pemimpin, userApp: data, is_admin: data.is_admin === "t", token: { Authorization: `Bearer ${token}` } }));
+         dispatch(
+            setInit({
+               user,
+               pemimpin,
+               userApp: data,
+               is_admin: data.is_admin === "t",
+               is_operator: data.is_operator === "t",
+               token: { Authorization: `Bearer ${token}` },
+            })
+         );
          setState({ isLoadingInitUser: false });
       });
    }

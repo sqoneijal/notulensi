@@ -12,7 +12,7 @@ import { useNavigate } from "react-router";
 
 const Forms = () => {
    const { init, module } = useSelector((e) => e.redux);
-   const { pemimpin, token } = init;
+   const { token } = init;
    const { detailUpdate } = module;
    const navigate = useNavigate();
    const dispatch = useDispatch();
@@ -28,8 +28,15 @@ const Forms = () => {
          moderator: [],
          kategori: [],
          peserta_rapat: [],
+         keywords: [],
+         pemimpin: [],
       },
    });
+
+   async function getPemimpin(username, token) {
+      const tokenValue = token.replace(/^Bearer\s+/i, "");
+      return await cariPegawai(username, tokenValue);
+   }
 
    useEffect(() => {
       if (typeof detailUpdate !== "undefined" && Object.keys(detailUpdate).length > 0) {
@@ -54,19 +61,29 @@ const Forms = () => {
                ],
                kategori: detailUpdate.kategori,
                peserta_rapat: detailUpdate.peserta.map((row) => ({ ...row, id: row.nip, value: row.nip, label: `${row.nama} | ${row.nip}` })),
+               keywords: detailUpdate.keywords,
             },
          }));
+
+         (async () => {
+            const pemimpin = await getPemimpin(detailUpdate.pemimpin_username, token.Authorization);
+            setState((prev) => ({
+               ...prev,
+               selected: { ...prev.selected, pemimpin: [{ value: pemimpin[0].id, label: pemimpin[0].nama, ...pemimpin[0] }] },
+            }));
+         })();
       }
       return () => {};
-   }, [detailUpdate]);
+   }, [detailUpdate, token]);
 
    const createOrUpdate = async () => {
+      const pemimpin = JSON.stringify(selected.pemimpin.length > 0 ? selected.pemimpin[0] : []);
       const moderator = JSON.stringify(selected.moderator.length > 0 ? selected.moderator[0] : []);
       const kategori = JSON.stringify(selected.kategori.length > 0 ? selected.kategori : []);
       const peserta_rapat = JSON.stringify(selected.peserta_rapat.length > 0 ? selected.peserta_rapat : []);
+      const keywords = JSON.stringify(selected.keywords.length > 0 ? selected.keywords : []);
 
-      const nip = { pemimpin: JSON.stringify(pemimpin), moderator };
-      const combined = { ...input, ...nip, ...{ kategori }, ...{ peserta_rapat } };
+      const combined = { ...input, ...{ pemimpin }, ...{ moderator }, ...{ kategori }, ...{ peserta_rapat }, ...{ keywords } };
 
       const apiCall =
          detailUpdate && Object.keys(detailUpdate).length > 0
@@ -147,13 +164,24 @@ const Forms = () => {
                   />
                </Row>
                <Row>
-                  <FormText
+                  <AsyncFormTypeahead
                      label="Pemimpin Rapat"
-                     name="pemimpin_id"
                      errors={errors}
-                     value={`${pemimpin.nama} | ${pemimpin.id}`}
+                     name="pemimpin"
                      col={{ md: 6 }}
-                     disabled={true}
+                     isLoading={isLoadingSearch}
+                     onSearch={(query) =>
+                        cariPegawai(query, token.Authorization.replace(/^Bearer\s+/i, "")).then((res) => {
+                           const daftarPegawai = [];
+                           res.forEach((row) => {
+                              daftarPegawai.push({ value: row.id, label: `${row.nama} | ${row.id}`, ...row });
+                           });
+                           setState((prev) => ({ ...prev, dropdown: { ...prev.dropdown, daftarPegawai } }));
+                        })
+                     }
+                     options={dropdown.daftarPegawai}
+                     onChange={(data) => setState((prev) => ({ ...prev, selected: { ...prev.selected, pemimpin: data } }))}
+                     selected={selected?.pemimpin}
                   />
                   <AsyncFormTypeahead
                      label="Petugas Notulensi"
@@ -179,11 +207,22 @@ const Forms = () => {
                   <FormTypeaheadMultiple
                      label="Kategori"
                      name="kategori"
-                     col={{ md: 12 }}
+                     col={{ md: 6 }}
                      options={module.daftarKategori}
                      selected={selected.kategori}
                      onChange={(data) => setState((prev) => ({ ...prev, selected: { ...prev.selected, kategori: data } }))}
                   />
+                  <FormTypeaheadMultiple
+                     label="Keywords"
+                     name="keywords"
+                     col={{ md: 6 }}
+                     options={module.daftarKeywords}
+                     selected={selected.keywords}
+                     onChange={(data) => setState((prev) => ({ ...prev, selected: { ...prev.selected, keywords: data } }))}
+                     allowNew={true}
+                  />
+               </Row>
+               <Row>
                   <AsyncFormTypeahead
                      label="Peserta Rapat"
                      errors={errors}

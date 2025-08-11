@@ -44,6 +44,10 @@ class Notulen
             'rules' => 'required',
             'label' => 'Lokasi rapat'
          ],
+         'pemimpin' => [
+            'rules' => 'required|valid_json',
+            'label' => 'Pemimpin rapat'
+         ]
       ];
    }
 }

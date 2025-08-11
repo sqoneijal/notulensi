@@ -17,7 +17,7 @@ const routes = [
       name: "Unauthorized",
       element: Unauthorized,
       breadcrumbs: ["Unauthorized"],
-      allowedRoles: ["is_admin", "default"],
+      allowedRoles: ["is_admin", "default", "is_operator"],
    },
    {
       path: "/",
@@ -42,7 +42,7 @@ const routes = [
       name: "Notulen",
       element: NotulenForms,
       breadcrumbs: ["Notulen", "Forms"],
-      allowedRoles: ["is_admin", "bos"],
+      allowedRoles: ["is_admin", "bos", "is_operator"],
    },
    {
       path: "/notulen/detail/:id",

@@ -7,6 +7,38 @@ import { useSelector } from "react-redux";
 const Umum = () => {
    const { module } = useSelector((e) => e.redux);
 
+   const renderKategori = (list) => {
+      return (
+         list.length > 0 && (
+            <ul className="fw-bold list-group list-group-horizontal-sm">
+               {list.map((row, index) => {
+                  return (
+                     <li className={`list-group-item ${index === 0 ? "border-left-primary" : ""}`} key={row.value}>
+                        {row.label}
+                     </li>
+                  );
+               })}
+            </ul>
+         )
+      );
+   };
+
+   const renderKeywords = (list) => {
+      return (
+         list.length > 0 && (
+            <ul className="fw-bold list-group list-group-horizontal-sm">
+               {list.map((row, index) => {
+                  return (
+                     <li className={`list-group-item ${index === 0 ? "border-left-success" : ""}`} key={row.value}>
+                        {row.label}
+                     </li>
+                  );
+               })}
+            </ul>
+         )
+      );
+   };
+
    return (
       <React.Fragment>
          <Row>
@@ -19,6 +51,10 @@ const Umum = () => {
             {detail("Petugas Notulensi", `${module.moderator} | ${module.nip_moderator}`, { md: 6 })}
          </Row>
          <Row>{detail("Lokasi Rapat", module.lokasi, { md: 12 })}</Row>
+         <Row>
+            {detail("Kategori", renderKategori(module.kategori), { md: 6 })}
+            {detail("Keywords", renderKeywords(module.keywords), { md: 6 })}
+         </Row>
       </React.Fragment>
    );
 };

@@ -7,14 +7,14 @@ import path from "./routes_path";
 
 const Routing = () => {
    const { init } = useSelector((e) => e.redux);
-   const { is_admin, userApp } = init;
+   const { is_admin, userApp, is_operator } = init;
 
-   const getUserRole = (is_admin, level) => {
+   const getUserRole = (is_admin, level, is_operator) => {
       if (is_admin) {
          return "is_admin";
       }
 
-      return level;
+      return is_operator ? "is_operator" : level;
    };
 
    return (
@@ -29,7 +29,7 @@ const Routing = () => {
                      path={item.path}
                      element={
                         item?.allowedRoles ? (
-                           <ProtectedRoute allowedRoles={item.allowedRoles} userRole={getUserRole(is_admin, userApp.level)}>
+                           <ProtectedRoute allowedRoles={item.allowedRoles} userRole={getUserRole(is_admin, userApp.level, is_operator)}>
                               <item.element />
                            </ProtectedRoute>
                         ) : (

@@ -11,7 +11,7 @@ import { useNavigate } from "react-router";
 
 const Index = () => {
    const { module, init } = useSelector((e) => e.redux);
-   const { is_admin, userApp, user } = init;
+   const { is_admin, userApp, user, is_operator } = init;
    const dispatch = useDispatch();
    const gridRef = useRef(null);
    const navigate = useNavigate();
@@ -22,13 +22,13 @@ const Index = () => {
 
    useEffect(() => {
       const result_note_id = [...userApp.note_id_pemimpin, ...userApp.note_id_petugas];
-      const noteIdParam = result_note_id.length > 0 ? "note_id=" + result_note_id.join(",") : "";
+      const noteIdParam = result_note_id.length > 0 ? `note_id=${result_note_id.join(",")}` : "";
       setState({ grid_server: `/notulen?is_admin=${is_admin}&${noteIdParam}` });
       return () => {};
    }, [userApp, is_admin]);
 
    useEffect(() => {
-      if (is_admin || userApp.level === "bos") {
+      if (is_admin || userApp.level === "bos" || is_operator) {
          dispatch(
             setActionButton({
                type: "add",
@@ -42,7 +42,7 @@ const Index = () => {
       }
 
       return () => {};
-   }, [dispatch, is_admin, userApp]);
+   }, [dispatch, is_admin, userApp, is_operator]);
 
    return (
       <Row>
@@ -88,7 +88,7 @@ const Index = () => {
                                  type: "button",
                                  title: "Edit",
                                  onClick: () => {
-                                    if (user.preferred_username === row.user_modified) {
+                                    if (user.preferred_username === row.user_modified || is_admin) {
                                        dispatch(setModule({ ...module, detailUpdate: row }));
                                        return navigate(`/notulen/forms`);
                                     }
@@ -100,7 +100,7 @@ const Index = () => {
                                  type: "button",
                                  title: "Delete",
                                  onCLick: () => {
-                                    if (user.preferred_username === row.user_modified) {
+                                    if (user.preferred_username === row.user_modified || is_admin) {
                                        const send = confirm(`/notulen/${row.id}`);
                                        send.then((res) => {
                                           if (typeof res !== "undefined") {
