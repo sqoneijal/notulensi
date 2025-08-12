@@ -1,5 +1,5 @@
 @import url("../../../node_modules/animate.css/animate.css");
-@import url("../../../node_modules/@fancyapps/ui/dist/fancybox/fancybox.css");
+/* @import url("../../../node_modules/@fancyapps/ui/dist/fancybox/fancybox.css"); */
 @import url("../../../node_modules/linearicons/dist/web-font/style.css");
 @import url("../../../node_modules/swiper/swiper-bundle.css");
 @import url("fonts.css");
@@ -1856,7 +1856,7 @@ Scroll To Top style
 .play-icon {
    width: 45px;
    height: 61px;
-   background-image: url(../images/icons/play-icon.png);
+   background-image: url(../images/play-icon.png);
 }
 
 .icon-arrow {

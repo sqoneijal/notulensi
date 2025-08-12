@@ -49,6 +49,7 @@ const Forms = () => {
                meeting_date: detailUpdate.meeting_date,
                moderator: [{ value: detailUpdate.moderator_id, label: detailUpdate.moderator, id: detailUpdate.moderator_username }],
                lokasi: detailUpdate.lokasi,
+               embed_youtube: detailUpdate.embed_youtube,
             },
             selected: {
                ...prev.selected,
