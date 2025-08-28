@@ -358,8 +358,6 @@ class Notulen extends Common
 
          $data['note_id'] = $id;
 
-         $this->handleModeratorParticipants($data);
-
          if (@$post['kategori']) {
             $kategori = json_decode($post['kategori'], true);
             if (!empty($kategori)) {
@@ -381,9 +379,31 @@ class Notulen extends Common
             }
          }
 
+         $this->handleModeratorParticipants($data);
+         $this->handlePemimpinParticipants($data);
+
          return ['status' => true, 'message' => 'Data berhasil disimpan.', 'note_id' => $this->getNoteIDList($post['user_modified'])];
       } catch (\Exception $e) {
          return ['status' => false, 'message' => $e->getMessage()];
+      }
+   }
+
+   private function handlePemimpinParticipants(array $post): void
+   {
+      $table = $this->db->table('tb_participants');
+      $table->where('status_participants', 'pemimpin');
+      $table->where('note_id', $post['note_id']);
+      $table->where('user_id', $post['pemimpin_id']);
+
+      $count = $table->countAllResults();
+
+      if (!$count > 0) {
+         $this->db->table('tb_participants')->ignore(true)->insert([
+            'note_id' => $post['note_id'],
+            'user_id' => $post['pemimpin_id'],
+            'status_participants' => 'pemimpin',
+            'create_at' => new RawSql('now()')
+         ]);
       }
    }
 
@@ -397,7 +417,7 @@ class Notulen extends Common
       $count = $table->countAllResults();
 
       if (!$count > 0) {
-         $this->db->table('tb_participants')->insert([
+         $this->db->table('tb_participants')->ignore(true)->insert([
             'note_id' => $post['note_id'],
             'user_id' => $post['moderator_id'],
             'status_participants' => 'moderator',
@@ -524,7 +544,6 @@ class Notulen extends Common
       $builder = $this->db->table('tb_participants');
       $existing = $builder->select('user_id')
          ->where('note_id', $noteId)
-         ->where('status_participants', 'peserta')
          ->get()
          ->getResultArray();
 
@@ -534,10 +553,9 @@ class Notulen extends Common
       $toDelete = array_diff($existingIds, $newIds);
 
       foreach ($toInsert as $userId) {
-         $builder->insert([
+         $builder->ignore(true)->insert([
             'note_id' => $noteId,
             'user_id' => $userId,
-            'status_participants' => 'peserta',
             'create_at' => new RawSql('now()')
          ]);
       }

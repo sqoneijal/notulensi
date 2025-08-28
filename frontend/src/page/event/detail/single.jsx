@@ -18,6 +18,10 @@ const Single = ({ data }) => {
    const { embed_youtube } = data;
 
    function getYouTubeID(url) {
+      if (!url) {
+         return null;
+      }
+
       const u = new URL(url);
 
       // youtu.be/<id>
