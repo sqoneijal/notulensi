@@ -5,11 +5,13 @@ import { post, postValue, put } from "@helpers/request";
 import { useEffect, useState } from "react";
 import { Button, Modal, Row } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
+import { useParams } from "react-router";
 
 const FormsLampiran = () => {
    const { module } = useSelector((e) => e.redux);
    const { openFormsLampiran, detailLampiran } = module;
    const dispatch = useDispatch();
+   const { id } = useParams();
 
    const [{ errors, input, isSubmit }, setState] = useState({
       input: {},
@@ -44,8 +46,8 @@ const FormsLampiran = () => {
    const createOrUpdate = async () => {
       const apiCall =
          openFormsLampiran && typeof detailLampiran !== "undefined" && Object.keys(detailLampiran).length > 0
-            ? () => put(`/notulen/lampiran/${detailLampiran.id}`, { ...input, ...{ note_id: module.note_id } })
-            : () => post("/notulen/lampiran", postValue({ ...input, ...{ note_id: module.note_id } }));
+            ? () => put(`/notulen/lampiran/${detailLampiran.id}`, { ...input, ...{ note_id: id } })
+            : () => post("/notulen/lampiran", postValue({ ...input, ...{ note_id: id } }));
       return apiCall();
    };
 

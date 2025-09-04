@@ -244,34 +244,29 @@ class Notulen extends Common
    public function getDetail(int $id): array
    {
       try {
-         $table = $this->db->table('tb_notes t');
-         $table->select('t.id as note_id, t.title, t.meeting_date, t.agenda, t.discussion_points, t.decisions, t2.full_name as pemimpin, t2.username as nip_pemimpin, t3.full_name as moderator, t3.username as nip_moderator, t.banner_image, coalesce(t4.kategori, \'[]\') as kategori, coalesce(t5.peserta, \'[]\') as peserta, coalesce(t6.presensi, \'[]\') as presensi, coalesce(taid.butir_tugas, \'[]\') as butir_tugas, coalesce(ta.lampiran, \'[]\') as lampiran, t.lokasi, coalesce(tnk.keywords, \'[]\') as keywords');
-         $table->join('tb_users t2', 't2.id = t.pemimpin_id', 'left');
-         $table->join('tb_users t3', 't3.id = t.moderator_id', 'left');
-         $table->join('(' . new RawSql($this->prepareSubQueryKategori()) . ') t4', 't4.note_id = t.id', 'left');
-         $table->join('(' . new RawSql($this->prepareSubQueryPeserta()) . ') t5', 't5.note_id = t.id', 'left');
-         $table->join('(' . new RawSql($this->prepareSubQueryPresensi()) . ') t6', 't6.note_id = t.id', 'left');
-         $table->join('(' . new RawSql($this->prepareSubQueryButirTugas()) . ') taid', 'taid.note_id = t.id', 'left');
-         $table->join('(' . new RawSql($this->prepareSubQueryLampiran()) . ') ta', 'ta.note_id = t.id', 'left');
-         $table->join('(' . new RawSql($this->prepareSubQueryKeywords()) . ') tnk', 'tnk.note_id = t.id', 'left');
-         $table->where('t.id', $id);
+         $table = $this->db->table('tb_notes tn');
+         $table->select('tn.*, tu.full_name as pemimpin, tu.username as nip_pemimpin, tu2.full_name as moderator, tu2.username as nip_moderator');
+         $table->join('tb_users tu', 'tu.id = tn.pemimpin_id', 'left');
+         $table->join('tb_users tu2', 'tu2.id = tn.moderator_id', 'left');
+         $table->where('tn.id', $id);
 
          $get = $table->get();
          $data = $get->getRowArray();
          $fieldNames = $get->getFieldNames();
          $get->freeResult();
 
-         $field_decode_json = ['kategori', 'peserta', 'presensi', 'butir_tugas', 'lampiran', 'keywords'];
-
          $response = [];
          if (isset($data)) {
             foreach ($fieldNames as $field) {
-               if (in_array($field, $field_decode_json)) {
-                  $response[$field] = json_decode($data[$field], true);
-               } else {
-                  $response[$field] = ($data[$field] ? trim($data[$field]) : (string) $data[$field]);
-               }
+               $response[$field] = ($data[$field] ? trim($data[$field]) : (string) $data[$field]);
             }
+
+            $response['kategori'] = $this->getNotesCategories($id);
+            $response['peserta'] = $this->getDaftarPesertaRapat($id);
+            $response['presensi'] = $this->getDaftarPresensi($id);
+            $response['butir_tugas'] = $this->getDaftarButirTugas($id);
+            $response['lampiran'] = $this->getDaftarLampiran($id);
+            $response['keywords'] = $this->getDaftarKeywordsDetail($id);
          }
 
          return ['status' => true, 'content' => $response];
@@ -280,49 +275,106 @@ class Notulen extends Common
       }
    }
 
-   private function prepareSubQueryLampiran(): string
+   private function getDaftarKeywordsDetail(int $note_id): array
    {
-      $table = $this->db->table('tb_attachments');
-      $table->select('note_id,
-         json_agg(json_build_object(
-            \'id\', id,
-            \'file_name\', file_name,
-            \'file_path\', file_path,
-            \'user_modified\', user_modified
-         )) as lampiran');
-      $table->groupBy('note_id');
+      $table = $this->db->table('tb_notes_keywords');
+      $table->select('id, note_id, keyword as label, slug as value');
+      $table->where('note_id', $note_id);
 
-      return $table->getCompiledSelect();
+      $get = $table->get();
+      $result = $get->getResultArray();
+      $fieldNames = $get->getFieldNames();
+      $get->freeResult();
+
+      $response = [];
+      foreach ($result as $key => $val) {
+         foreach ($fieldNames as $field) {
+            $response[$key][$field] = $val[$field] ? trim($val[$field]) : (string) $val[$field];
+         }
+      }
+      return $response;
    }
 
-   private function prepareSubQueryButirTugas(): string
+   private function getDaftarButirTugas(int $note_id): array
    {
-      $table = $this->db->table('tb_action_item_details taid');
-      $table->select('taid.note_id,
-         json_agg(json_build_object(
-            \'description\', taid.description,
-            \'assigned_to\', taid.assigned_to,
-            \'due_date\', taid.due_date,
-            \'status\', taid.status
-         )) as butir_tugas');
-      $table->groupBy('taid.note_id');
+      $table = $this->db->table('tb_action_item_details');
+      $table->where('note_id', $note_id);
 
-      return $table->getCompiledSelect();
+      $get = $table->get();
+      $result = $get->getResultArray();
+      $fieldNames = $get->getFieldNames();
+      $get->freeResult();
+
+      $response = [];
+      foreach ($result as $key => $val) {
+         foreach ($fieldNames as $field) {
+            $response[$key][$field] = $val[$field] ? trim($val[$field]) : (string) $val[$field];
+         }
+      }
+      return $response;
    }
 
-   private function prepareSubQueryPresensi(): string
+   private function getDaftarPresensi(int $note_id): array
    {
-      $table = $this->db->table('tb_participants t');
-      $table->select('t.note_id,
-		json_agg(json_build_object(
-			\'attendance_time\', t2.attendance_time,
-			\'status\', t2.status,
-			\'participant_id\', t2.participant_id
-		)) as presensi');
-      $table->join('tb_attendances t2', 't2.participant_id = t.id and t2.note_id = t.note_id');
-      $table->groupBy('t.note_id');
+      $table = $this->db->table('tb_participants tp');
+      $table->select('ta.attendance_time, ta.status, tp.id as participant_id');
+      $table->join('tb_attendances ta', 'ta.participant_id = tp.id and ta.note_id = tp.note_id');
+      $table->where('tp.note_id', $note_id);
 
-      return $table->getCompiledSelect();
+      $get = $table->get();
+      $result = $get->getResultArray();
+      $fieldNames = $get->getFieldNames();
+      $get->freeResult();
+
+      $response = [];
+      foreach ($result as $key => $val) {
+         foreach ($fieldNames as $field) {
+            $response[$key][$field] = $val[$field] ? trim($val[$field]) : (string) $val[$field];
+         }
+      }
+      return $response;
+   }
+
+   private function getDaftarPesertaRapat(int $note_id): array
+   {
+      $table = $this->db->table('tb_participants tp');
+      $table->select('tp.id as participants_id, tp.note_id, tu.full_name as nama, tu.email as email, tu.username as nip, tp.status_participants');
+      $table->join('tb_users tu', 'tu.id = tp.user_id');
+      $table->where('tp.note_id', $note_id);
+
+      $get = $table->get();
+      $result = $get->getResultArray();
+      $fieldNames = $get->getFieldNames();
+      $get->freeResult();
+
+      $response = [];
+      foreach ($result as $key => $val) {
+         foreach ($fieldNames as $field) {
+            $response[$key][$field] = $val[$field] ? trim($val[$field]) : (string) $val[$field];
+         }
+      }
+      return $response;
+   }
+
+   private function getNotesCategories(int $note_id): array
+   {
+      $table = $this->db->table('tb_note_categories tnc');
+      $table->select('tnc.note_id, tnc.id as value, tc.category_name as label');
+      $table->join('tb_categories tc', 'tc.id = tnc.category_id');
+      $table->where('tnc.note_id', $note_id);
+
+      $get = $table->get();
+      $result = $get->getResultArray();
+      $fieldNames = $get->getFieldNames();
+      $get->freeResult();
+
+      $response = [];
+      foreach ($result as $key => $val) {
+         foreach ($fieldNames as $field) {
+            $response[$key][$field] = $val[$field] ? trim($val[$field]) : (string) $val[$field];
+         }
+      }
+      return $response;
    }
 
    public function deleteData(int $id): array
@@ -395,9 +447,14 @@ class Notulen extends Common
       $table->where('note_id', $post['note_id']);
       $table->where('user_id', $post['pemimpin_id']);
 
-      $count = $table->countAllResults();
+      $found = $table->countAllResults() > 0 ? true : false;
 
-      if (!$count > 0) {
+      if (!$found) {
+         $this->db->table('tb_participants')->where([
+            'note_id' => $post['note_id'],
+            'status_participants' => 'pemimpin',
+         ])->delete();
+
          $this->db->table('tb_participants')->ignore(true)->insert([
             'note_id' => $post['note_id'],
             'user_id' => $post['pemimpin_id'],
@@ -414,9 +471,14 @@ class Notulen extends Common
       $table->where('note_id', $post['note_id']);
       $table->where('user_id', $post['moderator_id']);
 
-      $count = $table->countAllResults();
+      $found = $table->countAllResults() > 0 ? true : false;
 
-      if (!$count > 0) {
+      if (!$found) {
+         $this->db->table('tb_participants')->where([
+            'note_id' => $post['note_id'],
+            'status_participants' => 'moderator',
+         ])->delete();
+
          $this->db->table('tb_participants')->ignore(true)->insert([
             'note_id' => $post['note_id'],
             'user_id' => $post['moderator_id'],
@@ -544,6 +606,7 @@ class Notulen extends Common
       $builder = $this->db->table('tb_participants');
       $existing = $builder->select('user_id')
          ->where('note_id', $noteId)
+         ->where('status_participants', 'peserta')
          ->get()
          ->getResultArray();
 
@@ -556,6 +619,7 @@ class Notulen extends Common
          $builder->ignore(true)->insert([
             'note_id' => $noteId,
             'user_id' => $userId,
+            'status_participants' => 'peserta',
             'create_at' => new RawSql('now()')
          ]);
       }
@@ -607,26 +671,32 @@ class Notulen extends Common
 
    private function insertPemimpinRapat(array $post): void
    {
-      if (!empty($post['pemimpin_id'])) {
-         $this->db->table('tb_participants')->insert([
-            'note_id' => $post['note_id'],
-            'user_id' => $post['pemimpin_id'],
-            'status_participants' => 'pemimpin',
-            'create_at' => new RawSql('now()')
-         ]);
-      }
+      $this->db->table('tb_participants')->where([
+         'note_id' => $post['note_id'],
+         'user_id' => $post['pemimpin_id']
+      ])->delete();
+
+      $this->db->table('tb_participants')->insert([
+         'note_id' => $post['note_id'],
+         'user_id' => $post['pemimpin_id'],
+         'status_participants' => 'pemimpin',
+         'create_at' => new RawSql('now()')
+      ]);
    }
 
    private function insertModeratorRapat(array $post): void
    {
-      if (!empty($post['moderator_id'])) {
-         $this->db->table('tb_participants')->insert([
-            'note_id' => $post['note_id'],
-            'user_id' => $post['moderator_id'],
-            'status_participants' => 'moderator',
-            'create_at' => new RawSql('now()')
-         ]);
-      }
+      $this->db->table('tb_participants')->where([
+         'note_id' => $post['note_id'],
+         'user_id' => $post['moderator_id']
+      ])->delete();
+
+      $this->db->table('tb_participants')->insert([
+         'note_id' => $post['note_id'],
+         'user_id' => $post['moderator_id'],
+         'status_participants' => 'moderator',
+         'create_at' => new RawSql('now()')
+      ]);
    }
 
    private function prepareSubQueryKategori(): string

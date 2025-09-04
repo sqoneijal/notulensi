@@ -117,7 +117,7 @@ const Peserta = () => {
    };
 
    return (
-      <Table>
+      <Table size="sm">
          <thead>
             {listEmailToSending.length > 0 && (
                <tr>

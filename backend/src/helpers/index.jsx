@@ -6,4 +6,9 @@ const isKategori1 = (content, is_admin) => {
    return content.length > 0 && content[0]?.posisi?.kategori === 3;
 };
 
-export { isKategori1 };
+function getHashValue(url) {
+   const hash = url.split("#")[1];
+   return hash ? hash.split("&")[0] : null;
+}
+
+export { getHashValue, isKategori1 };

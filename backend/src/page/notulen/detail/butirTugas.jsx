@@ -34,7 +34,7 @@ const ButirTugas = () => {
    };
 
    return (
-      <Table>
+      <Table size="sm">
          <thead>
             <tr>
                <th className="text-center" style={{ width: "2%" }}>

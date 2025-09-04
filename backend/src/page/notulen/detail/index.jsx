@@ -1,11 +1,13 @@
 import { setActionButton, setModule } from "@/redux";
+import { getHashValue } from "@helpers";
 import PageLoader from "@helpers/pageloader";
 import { get } from "@helpers/request";
 import { useEffect, useState } from "react";
 import { Card, Col, Row, Tab, Tabs } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate, useParams } from "react-router";
+import { useLocation, useNavigate, useParams } from "react-router";
 import ButirTugas from "./butirTugas";
+import CetakHasilNotulensi from "./cetak-hasil-notulensi";
 import FormsLampiran from "./formsLampiran";
 import HasilDiskusi from "./hasilDiskusi";
 import Keputusan from "./keputusan";
@@ -21,6 +23,7 @@ const Index = () => {
    const { id } = useParams();
    const navigate = useNavigate();
    const dispatch = useDispatch();
+   const location = useLocation();
 
    const [{ isLoading }, setState] = useState({
       isLoading: true,
@@ -73,6 +76,7 @@ const Index = () => {
       { event: "keputusan", title: "Hasil Keputusan", element: <Keputusan /> },
       { event: "lampiran", title: "Lampiran", element: <Lampiran /> },
       { event: "qrcode", title: "QRCode Presensi", element: <QrcodePresensi /> },
+      { event: "cetak", title: "Cetak Hasil Notulensi", element: <CetakHasilNotulensi /> },
    ];
 
    return isLoading ? (
@@ -85,12 +89,19 @@ const Index = () => {
          <Col xs={12}>
             <Card>
                <Card.Body>
-                  <Tabs defaultActiveKey="umum" id="umum" className="mb-3" transition={true}>
-                     {navTabs.map((tab) => (
-                        <Tab eventKey={tab.event} title={tab.title} key={tab.event}>
-                           {tab.element}
-                        </Tab>
-                     ))}
+                  <Tabs
+                     defaultActiveKey={getHashValue(location.hash)}
+                     id={getHashValue(location.hash)}
+                     className="mb-3"
+                     transition={true}
+                     onSelect={(key) => navigate(`#${key}`)}>
+                     {navTabs.map((tab) => {
+                        return (
+                           <Tab eventKey={tab.event} title={tab.title} key={tab.event}>
+                              {tab.element}
+                           </Tab>
+                        );
+                     })}
                   </Tabs>
                </Card.Body>
             </Card>

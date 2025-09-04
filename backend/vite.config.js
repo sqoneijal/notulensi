@@ -18,6 +18,6 @@ export default defineConfig({
       dedupe: ["react", "react-dom"],
    },
    optimizeDeps: {
-      include: ["react", "react-dom"],
+      include: ["react", "react-dom", "pdfmake/build/pdfmake.min", "pdfmake/build/vfs_fonts"],
    },
 });

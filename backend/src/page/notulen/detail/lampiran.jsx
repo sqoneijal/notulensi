@@ -19,7 +19,7 @@ const Lampiran = () => {
    }, [module.lampiran]);
 
    return (
-      <Table>
+      <Table size="sm">
          <thead>
             <tr>
                <td colSpan={3}>

@@ -60,7 +60,7 @@ const Index = () => {
                                  href: "#",
                                  onClick: (e) => {
                                     e.preventDefault();
-                                    navigate(`/notulen/detail/${row.id}`);
+                                    navigate(`/notulen/detail/${row.id}#umum`);
                                  },
                               },
                               row.title
