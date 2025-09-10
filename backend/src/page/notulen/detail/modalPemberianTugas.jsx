@@ -28,7 +28,7 @@ const ModalPemberianTugas = ({ getDetail }) => {
    useEffect(() => {
       if (openModalPemberianTugas && Object.keys(detailPeserta).length > 0) {
          const due_date = typeof detailPeserta?.due_date === "undefined" ? "" : detailPeserta?.due_date;
-         setInput("due_date", due_date);
+         setState((prev) => ({ ...prev, input: { ...prev.input, due_date } }));
       }
       return () => {};
    }, [openModalPemberianTugas, detailPeserta]);
@@ -49,12 +49,7 @@ const ModalPemberianTugas = ({ getDetail }) => {
 
       const fetch = post(
          "/notulen/submit-butir-tugas",
-         postValue({
-            ...input,
-            ...{ description: editorRef.current.getContent() },
-            ...{ note_id: module.note_id },
-            ...{ assigned_to: detailPeserta.participants_id },
-         })
+         postValue({ ...input, note_id: id, description: editorRef.current.getContent(), assigned_to: detailPeserta.participants_id })
       );
       fetch.then(({ data }) => {
          setState((prev) => ({ ...prev, errors: data.errors }));

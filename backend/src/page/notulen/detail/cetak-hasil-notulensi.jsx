@@ -2,6 +2,7 @@ import { detail } from "@components/detail";
 import { Each } from "@helpers/each";
 import dompurify from "dompurify";
 import { decode } from "html-entities";
+import htmlToPdfmake from "html-to-pdfmake";
 import moment from "moment";
 import pdfMake from "pdfmake/build/pdfmake.min.js";
 import "pdfmake/build/vfs_fonts.js";
@@ -51,14 +52,58 @@ const CetakHasilNotulensi = () => {
    const handleCetak = (e) => {
       e.preventDefault();
 
+      const peserta_rapat = [];
+      module.peserta.map((row, i) => {
+         peserta_rapat.push([
+            { text: i + 1, alignment: "center" },
+            row.nip,
+            row.nama,
+            row.email,
+            renderPresensi(getStatusPresesnsi(module.presensi)?.[row.participants_id]),
+            getStatusPresensi(getStatusPresesnsi(module.presensi)?.[row.participants_id])
+               ?.toLowerCase()
+               .replace(/\b[a-z]/g, (letter) => letter.toUpperCase()) || "",
+         ]);
+      });
+
+      const butir_tugas = [];
+      module.peserta.map((row, i) => {
+         const getIsiTugas = getTugas(module.butir_tugas)?.[row.participants_id];
+         const tugas = typeof getIsiTugas === "undefined" ? {} : getIsiTugas;
+
+         const cleanHtml = dompurify.sanitize(decode(tugas?.description || ""), {
+            USE_PROFILES: { html: true },
+         });
+
+         // convert html -> pdfmake format
+         const deskripsi = cleanHtml ? htmlToPdfmake(cleanHtml, { defaultStyles: {} }) : "-";
+
+         butir_tugas.push([
+            { text: i + 1, alignment: "center" },
+            row.nip,
+            row.nama,
+            tugas?.due_date ? moment(tugas?.due_date).format("DD-MM-YYYY") : "-",
+            deskripsi,
+         ]);
+      });
+
+      const lampiran = [];
+      module.lampiran.map((row, i) => {
+         lampiran.push([{ text: i + 1, alignment: "center" }, row.file_name, row.file_path]);
+      });
+
       const docDefinition = {
          content: [
+            { text: "Hasil Notulensi", style: "header", alignment: "center", fontSize: 12 },
+            { text: " " },
+            { text: " " },
             { text: "Informasi Rapat", style: "header" },
             { text: " " },
             {
                table: {
                   body: [
-                     ["Tanggal", ":", moment(module.meeting_date).format("DD-MM-YYYY hh:mm A")],
+                     ["Tanggal", ":", moment(module.meeting_date).format("DD-MM-YYYY")],
+                     ["Jam", ":", moment(module.meeting_date).format("hh:mm A")],
                      ["Judul", ":", module?.title],
                      ["Agenda", ":", module?.agenda],
                      ["Pemimpin", ":", `${module.pemimpin} | ${module.nip_pemimpin}`],
@@ -77,51 +122,98 @@ const CetakHasilNotulensi = () => {
             { text: " " },
             {
                table: {
-                  body: [
-                     ["No", "NIP", "Nama", "Email", "Presensi", "Status"],
-                     ...module.peserta.map((p, i) => [
-                        i + 1,
-                        p.nip,
-                        p.nama,
-                        p.email,
-                        renderPresensi(getStatusPresesnsi(module.presensi)?.[p.participants_id]),
-                        getStatusPresensi(getStatusPresesnsi(module.presensi)?.[p.participants_id])
-                           ?.toLowerCase()
-                           .replace(/\b[a-z]/g, (letter) => letter.toUpperCase()) || "",
-                     ]),
-                  ],
+                  body: [[{ text: "No", alignment: "center" }, "NIP", "Nama", "Email", "Presensi", "Status"], ...peserta_rapat],
                },
                fontSize: 11,
             },
-            /* {
-               stack: [
-                  { text: "Tanggal Rapat", bold: true }, // label
-                  { text: "18-09-2025 04:30 PM" }, // isi
-               ],
-               margin: [0, 5, 0, 10],
+            { text: " " },
+            { text: " " },
+            { text: "Poin - Poin Diskusi", style: "header" },
+            { text: " " },
+            {
+               text: htmlToPdfmake(
+                  dompurify.sanitize(decode(module.discussion_points || ""), {
+                     USE_PROFILES: { html: true },
+                  }),
+                  { defaultStyles: {} }
+               ),
+               fontSize: 11,
             },
+            { text: " " },
+            { text: " " },
+            { text: "Hasil Keputusan", style: "header" },
+            { text: " " },
+            {
+               text: htmlToPdfmake(
+                  dompurify.sanitize(decode(module.decisions || ""), {
+                     USE_PROFILES: { html: true },
+                  }),
+                  { defaultStyles: {} }
+               ),
+               fontSize: 11,
+            },
+            { text: " " },
+            { text: " " },
+            { text: "Butir Tugas", style: "header" },
+            { text: " " },
             {
                table: {
-                  headerRows: 1,
-                  widths: ["auto", "*", "auto"],
-                  body: [
-                     ["NIM", "Nama", "Jurusan"],
-                     ["160101", "Budi Santoso", "Informatika"],
-                     ["160102", "Siti Aminah", "Sistem Informasi"],
-                     ["160103", "Rizky", "Teknik Komputer"],
-                  ],
+                  body: [[{ text: "No", alignment: "center" }, "NIP", "Nama", "Tenggat Waktu", "Deskripsi"], ...butir_tugas],
                },
+               fontSize: 11,
             },
-
             { text: " " },
-            { text: "Dibuat otomatis pada: " + new Date().toLocaleDateString() }, */
+            { text: " " },
+            { text: "Lampiran", style: "header" },
+            { text: " " },
+            {
+               table: {
+                  body: [[{ text: "No", alignment: "center" }, "Nama Lampiran", "Link/URL"], ...lampiran],
+               },
+               fontSize: 11,
+            },
+            { text: " " },
+            { text: " " },
+            {
+               table: {
+                  widths: ["50%", "50%"],
+                  body: [
+                     [null, { text: `Banda Aceh, ${moment(module.meeting_date).format("DD-MM-YYYY")}`, alignment: "center" }],
+                     [null, { text: "Pemimpin Rapat", alignment: "center" }],
+                  ],
+                  fontSize: 11,
+               },
+               layout: "noBorders",
+            },
+            { text: " " },
+            { text: " " },
+            { text: " " },
+            { text: " " },
+            {
+               table: {
+                  widths: ["50%", "50%"],
+                  body: [
+                     [null, { text: module.pemimpin, alignment: "center" }],
+                     [null, { text: `NIP. ${module.nip_pemimpin}`, alignment: "center" }],
+                  ],
+                  fontSize: 11,
+               },
+               layout: "noBorders",
+            },
          ],
          styles: {
             header: {
-               fontSize: 14,
+               fontSize: 11,
                bold: true,
-               alignment: "center",
             },
+         },
+         footer(currentPage, pageCount) {
+            return {
+               text: `${currentPage.toString()} / ${pageCount}`,
+               alignment: "center",
+               fontSize: 9,
+               margin: [0, 10, 0, 0], // [left, top, right, bottom]
+            };
          },
       };
 

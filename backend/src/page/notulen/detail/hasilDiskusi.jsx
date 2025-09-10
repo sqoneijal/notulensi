@@ -6,10 +6,12 @@ import { decode } from "html-entities";
 import { useRef, useState } from "react";
 import { Button, Card } from "react-bootstrap";
 import { useSelector } from "react-redux";
+import { useParams } from "react-router";
 
 const HasilDiskusi = () => {
    const { module } = useSelector((e) => e.redux);
    const editorRef = useRef(null);
+   const { id } = useParams();
 
    const [{ isSubmit }, setState] = useState({
       isSubmit: false,
@@ -23,7 +25,7 @@ const HasilDiskusi = () => {
       const fetch = post(
          "/notulen/update-hasil-diskusi",
          postValue({
-            id: module.note_id,
+            id,
             discussion_points: editorRef.current.getContent(),
          })
       );
